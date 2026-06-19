@@ -1,0 +1,18 @@
+JOB DESCRIPTION:
+Gen AI Developer role requiring Python, Machine Learning, Deep Learning, LLM integration, Generative AI, prompt engineering, building AI agents and chatbots. Must know LangChain, API integration, and deploying AI models. Fresher or 1 year experience accepted.
+
+TAILORED OUTPUT:
+**Top 5 Keywords:**
+1. Python
+2. Machine Learning
+3. Deep Learning
+4. LangChain
+5. Generative AI
+
+**Rewritten Project Bullet Points:**
+- Developed a Deep Learning-based Object Detection Framework utilizing Python, Machine Learning, and Deep Learning techniques, achieving 93-95% detection accuracy by integrating YOLOv8 models with offline TTS pipelines and Streamlit deployment.
+- Designed and built an AI chatbot with memory using Groq API, demonstrating proficiency in building AI agents and chatbots, while exploring Generative AI and prompt engineering concepts.
+- Created a job scraper agent using Python, showcasing ability to integrate API and deploy AI models, with potential applications in LangChain and LLM integration.
+
+**Professional Summary:**
+Results-driven Gen AI Developer with expertise in Python, Machine Learning, and Deep Learning. Proficient in building AI agents, chatbots, and integrating LangChain and Generative AI concepts. Committed to delivering innovative AI solutions with strong technical skills and a passion for prompt engineering and deploying AI models.
