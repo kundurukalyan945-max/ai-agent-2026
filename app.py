@@ -111,25 +111,42 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs(["COACH", "RESUME", "INTERVIEW", "JOBS", 
 # TAB 1 — COACH
 # ══════════════════════════════════════════════════════════
 with tab1:
-    st.markdown('<div class="panel-head"><span class="panel-tag">AGENT 01</span><span class="panel-title">Career Coach</span></div><div class="panel-desc">Persistent memory across this session.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-head"><span class="panel-tag">AGENT 01</span><span class="panel-title">Career Coach</span></div><div class="panel-desc">Persistent memory · Upload a PDF to discuss it.</div>', unsafe_allow_html=True)
 
+    uploaded_pdf = st.file_uploader("Upload a PDF (resume, job posting, anything)", type=["pdf"], key="coach_pdf")
+    pdf_text = ""
+    if uploaded_pdf:
+        try:
+            from pypdf import PdfReader
+            reader = PdfReader(uploaded_pdf)
+            pdf_text = "\n".join([page.extract_text() or "" for page in reader.pages])
+            st.success(f"📄 {uploaded_pdf.name} loaded — {len(reader.pages)} pages. Ask about it below.")
+        except Exception as e:
+            st.error(f"Couldn't read PDF: {e}")
+
+    st.markdown('<div class="chat-scroll">', unsafe_allow_html=True)
     for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.write(msg["content"])
+        bubble_class = "bubble-user" if msg["role"] == "user" else "bubble-ai"
+        align = "flex-end" if msg["role"] == "user" else "flex-start"
+        st.markdown(f'<div style="display:flex; justify-content:{align}; margin:6px 0;"><div class="{bubble_class}">{msg["content"]}</div></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
     if prompt := st.chat_input("Ask your career coach anything..."):
+        full_prompt = prompt
+        if pdf_text:
+            full_prompt = f"[Context from uploaded PDF '{uploaded_pdf.name}']:\n{pdf_text[:4000]}\n\n[Question]: {prompt}"
+
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.write(prompt)
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                response = client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
-                    messages=[{"role": "system", "content": "You are Kalyan's AI career coach. He is a B.Tech CSE AI/ML student in Bengaluru targeting AI/ML jobs in 2026. Be encouraging, direct, and practical."}] + st.session_state.messages
-                )
-                reply = response.choices[0].message.content
-                st.write(reply)
-                st.session_state.messages.append({"role": "assistant", "content": reply})
+
+        with st.spinner("Thinking..."):
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "system", "content": "You are Kalyan's AI career coach. He is a B.Tech CSE AI/ML student in Bengaluru targeting AI/ML jobs in 2026. Be encouraging, direct, and practical. If PDF context is given, use it to answer."}] + 
+                [{"role": m["role"], "content": full_prompt if i == len(st.session_state.messages)-1 and m["role"]=="user" else m["content"]} for i, m in enumerate(st.session_state.messages)]
+            )
+            reply = response.choices[0].message.content
+            st.session_state.messages.append({"role": "assistant", "content": reply})
+        st.rerun()
 
 # ══════════════════════════════════════════════════════════
 # TAB 2 — RESUME
