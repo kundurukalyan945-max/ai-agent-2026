@@ -16,6 +16,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ──────────────────────────────────────────────────────────
+# SESSION STATE INIT
+# ──────────────────────────────────────────────────────────
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "score_history" not in st.session_state:
@@ -26,77 +29,208 @@ if "last_resume" not in st.session_state:
     st.session_state.last_resume = None
 if "job_results" not in st.session_state:
     st.session_state.job_results = None
+if "profile" not in st.session_state:
+    st.session_state.profile = {
+        "name": "Kundura Kalyan",
+        "education": "B.Tech CSE (AI/ML), SVCE Bengaluru, 2026, CGPA 7.3",
+        "skills": "Python, ML, Deep Learning, LangChain, Groq API, AI Agents, Streamlit",
+        "project": "Deep Learning Object Detection for Visually Impaired (YOLOv8, TTS, Streamlit, 93-95% accuracy)",
+        "target_role": "AI/ML Engineer",
+        "target_location": "Bengaluru"
+    }
 
+# ──────────────────────────────────────────────────────────
+# THEME TOKENS
+# ──────────────────────────────────────────────────────────
 THEMES = {
-    "dark": {"bg": "#0B0E11", "bg_card": "#14181D", "border": "#262C33", "accent": "#FF6A1A", "accent_dim": "#FF6A1A33", "text": "#E8EAED", "text_dim": "#8A919C", "text_faint": "#565D66", "green": "#3DD68C", "btn_text": "#0B0E11"},
-    "light": {"bg": "#FAF8F5", "bg_card": "#FFFFFF", "border": "#E4E0D8", "accent": "#D9540C", "accent_dim": "#D9540C22", "text": "#1A1A1A", "text_dim": "#5C5850", "text_faint": "#8C887E", "green": "#1F8C5C", "btn_text": "#FFFFFF"}
+    "dark": {
+        "bg": "#0B0E11", "bg_card": "#14181D", "border": "#262C33",
+        "accent": "#FF6A1A", "accent_dim": "#FF6A1A33", "text": "#E8EAED",
+        "text_dim": "#8A919C", "text_faint": "#565D66", "green": "#3DD68C",
+        "btn_text": "#0B0E11"
+    },
+    "light": {
+        "bg": "#FAF8F5", "bg_card": "#FFFFFF", "border": "#E4E0D8",
+        "accent": "#D9540C", "accent_dim": "#D9540C22", "text": "#1A1A1A",
+        "text_dim": "#5C5850", "text_faint": "#8C887E", "green": "#1F8C5C",
+        "btn_text": "#FFFFFF"
+    }
 }
 T = THEMES[st.session_state.theme]
 
 st.markdown(f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap');
-.stApp {{ background: {T['bg']}; }}
-* {{ font-family: 'Inter', sans-serif; }}
-#MainMenu, footer, header {{ visibility: hidden; }}
-.block-container {{ padding-top: 2rem; max-width: 1100px; }}
-.suite-header {{ display: flex; align-items: baseline; gap: 14px; margin-bottom: 2px; }}
-.suite-mark {{ color: {T['accent']}; font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; }}
-.suite-title {{ font-size: 30px; font-weight: 800; color: {T['text']}; letter-spacing: -0.5px; }}
-.suite-sub {{ font-family: 'JetBrains Mono', monospace; font-size: 13px; color: {T['text_faint']}; margin-bottom: 28px; margin-top: 4px; }}
-.suite-sub .dot {{ color: {T['green']}; }}
-.status-strip {{ display: flex; border: 1px solid {T['border']}; border-radius: 10px; overflow: hidden; background: {T['bg_card']}; }}
-.status-cell {{ flex: 1; padding: 14px 18px; }}
-.status-label {{ font-family: 'JetBrains Mono', monospace; font-size: 10px; color: {T['text_faint']}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }}
-.status-value {{ font-size: 14px; color: {T['text']}; font-weight: 600; }}
-.status-value.accent {{ color: {T['accent']}; }}
-.panel-head {{ display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }}
-.panel-tag {{ font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {T['accent']}; background: {T['accent_dim']}; padding: 3px 9px; border-radius: 5px; font-weight: 700; }}
-.panel-title {{ font-size: 20px; font-weight: 700; color: {T['text']}; }}
-.panel-desc {{ color: {T['text_dim']}; font-size: 13.5px; margin: 4px 0 20px 0; }}
-.stTextInput input, .stTextArea textarea, .stSelectbox > div > div {{ background: {T['bg_card']} !important; border: 1px solid {T['border']} !important; color: {T['text']} !important; border-radius: 8px !important; }}
-.stButton button {{ background: {T['accent']} !important; color: {T['btn_text']} !important; border: none !important; border-radius: 8px !important; font-weight: 700 !important; padding: 10px 22px !important; }}
-.stButton button:hover {{ filter: brightness(1.15); }}
-.stDownloadButton button {{ background: transparent !important; color: {T['accent']} !important; border: 1px solid {T['accent']} !important; border-radius: 8px !important; }}
-.stTabs [data-baseweb="tab-list"] {{ gap: 4px; background: {T['bg_card']}; padding: 5px; border-radius: 10px; border: 1px solid {T['border']}; flex-wrap: wrap; }}
-.stTabs [data-baseweb="tab"] {{ background: transparent; border-radius: 7px; color: {T['text_dim']}; font-weight: 600; padding: 10px 16px; }}
-.stTabs [aria-selected="true"] {{ background: {T['accent']} !important; color: {T['btn_text']} !important; }}
-.output-card {{ background: {T['bg_card']}; border: 1px solid {T['border']}; border-radius: 10px; padding: 22px 24px; margin-top: 18px; color: {T['text']}; }}
-.output-card-label {{ font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {T['green']}; text-transform: uppercase; margin-bottom: 12px; }}
-.score-badge {{ display: inline-flex; font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; padding: 8px 18px; border-radius: 8px; margin-bottom: 14px; }}
-.score-high {{ background: #3DD68C22; color: #3DD68C; border: 1px solid #3DD68C44; }}
-.score-mid {{ background: #FFB13C22; color: #FFB13C; border: 1px solid #FFB13C44; }}
-.score-low {{ background: #FF5C5C22; color: #FF5C5C; border: 1px solid #FF5C5C44; }}
-[data-testid="stSidebar"] {{ background: {T['bg_card']}; border-right: 1px solid {T['border']}; }}
-[data-testid="stChatMessage"] {{ background: {T['bg_card']} !important; border: 1px solid {T['border']} !important; border-radius: 10px !important; }}
-hr {{ border-color: {T['border']} !important; }}
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+    .stApp {{ background: {T['bg']}; }}
+    * {{ font-family: 'Inter', sans-serif; }}
+    code, .mono {{ font-family: 'JetBrains Mono', monospace !important; }}
+
+    #MainMenu, footer, header {{ visibility: hidden; }}
+    .block-container {{ padding-top: 2rem; max-width: 1100px; }}
+
+    .suite-header {{ display: flex; align-items: baseline; gap: 14px; margin-bottom: 2px; }}
+    .suite-mark {{ color: {T['accent']}; font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; }}
+    .suite-title {{ font-size: 30px; font-weight: 800; color: {T['text']}; letter-spacing: -0.5px; }}
+    .suite-sub {{ font-family: 'JetBrains Mono', monospace; font-size: 13px; color: {T['text_faint']}; margin-bottom: 28px; margin-top: 4px; letter-spacing: 0.3px; }}
+    .suite-sub .dot {{ color: {T['green']}; }}
+
+    .status-strip {{ display: flex; border: 1px solid {T['border']}; border-radius: 10px; overflow: hidden; background: {T['bg_card']}; }}
+    .status-cell {{ flex: 1; padding: 14px 18px; }}
+    .status-label {{ font-family: 'JetBrains Mono', monospace; font-size: 10px; color: {T['text_faint']}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }}
+    .status-value {{ font-size: 14px; color: {T['text']}; font-weight: 600; }}
+    .status-value.accent {{ color: {T['accent']}; }}
+
+    .panel-head {{ display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }}
+    .panel-tag {{ font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {T['accent']}; background: {T['accent_dim']}; padding: 3px 9px; border-radius: 5px; font-weight: 700; letter-spacing: 0.5px; }}
+    .panel-title {{ font-size: 20px; font-weight: 700; color: {T['text']}; }}
+    .panel-desc {{ color: {T['text_dim']}; font-size: 13.5px; margin: 4px 0 20px 0; }}
+
+    .stTextInput input, .stTextArea textarea, .stSelectbox > div > div {{
+        background: {T['bg_card']} !important; border: 1px solid {T['border']} !important;
+        color: {T['text']} !important; border-radius: 8px !important; font-size: 14px !important;
+    }}
+    .stTextInput input:focus, .stTextArea textarea:focus {{ border-color: {T['accent']} !important; box-shadow: 0 0 0 1px {T['accent']} !important; }}
+    .stTextArea textarea {{ font-family: 'JetBrains Mono', monospace !important; font-size: 13px !important; }}
+
+    .stButton button {{
+        background: {T['accent']} !important; color: {T['btn_text']} !important; border: none !important;
+        border-radius: 8px !important; font-weight: 700 !important; padding: 10px 22px !important;
+        font-size: 14px !important; transition: all 0.15s ease !important;
+    }}
+    .stButton button:hover {{ filter: brightness(1.15); transform: translateY(-1px); }}
+    .stDownloadButton button {{
+        background: transparent !important; color: {T['accent']} !important;
+        border: 1px solid {T['accent']} !important; border-radius: 8px !important; font-weight: 600 !important;
+    }}
+
+    .stTabs [data-baseweb="tab-list"] {{ gap: 4px; background: {T['bg_card']}; padding: 5px; border-radius: 10px; border: 1px solid {T['border']}; flex-wrap: wrap; }}
+    .stTabs [data-baseweb="tab"] {{ background: transparent; border-radius: 7px; color: {T['text_dim']}; font-weight: 600; padding: 10px 16px; font-size: 13px; }}
+    .stTabs [aria-selected="true"] {{ background: {T['accent']} !important; color: {T['btn_text']} !important; }}
+
+    .output-card {{ background: {T['bg_card']}; border: 1px solid {T['border']}; border-radius: 10px; padding: 22px 24px; margin-top: 18px; color: {T['text']}; }}
+    .output-card-label {{ font-family: 'JetBrains Mono', monospace; font-size: 11px; color: {T['green']}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }}
+
+    .score-badge {{ display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; padding: 8px 18px; border-radius: 8px; margin-bottom: 14px; }}
+    .score-high {{ background: #3DD68C22; color: #3DD68C; border: 1px solid #3DD68C44; }}
+    .score-mid {{ background: #FFB13C22; color: #FFB13C; border: 1px solid #FFB13C44; }}
+    .score-low {{ background: #FF5C5C22; color: #FF5C5C; border: 1px solid #FF5C5C44; }}
+
+    [data-testid="stSidebar"] {{ background: {T['bg_card']}; border-right: 1px solid {T['border']}; }}
+    [data-testid="stSidebar"] .stMarkdown {{ color: {T['text']}; }}
+    [data-testid="stChatMessage"] {{ background: {T['bg_card']} !important; border: 1px solid {T['border']} !important; border-radius: 10px !important; }}
+    hr {{ border-color: {T['border']} !important; }}
+    [data-testid="stDataFrame"] {{ border: 1px solid {T['border']}; border-radius: 8px; }}
+
+    .chat-scroll {{ max-height: 480px; overflow-y: auto; padding: 8px 4px; margin-bottom: 12px; }}
+    .bubble-user {{ background: {T['accent']}; color: {T['btn_text']}; padding: 10px 16px; border-radius: 18px 18px 4px 18px; max-width: 70%; font-size: 14px; line-height: 1.5; }}
+    .bubble-ai {{ background: {T['bg_card']}; border: 1px solid {T['border']}; color: {T['text']}; padding: 10px 16px; border-radius: 18px 18px 18px 4px; max-width: 70%; font-size: 14px; line-height: 1.5; }}
 </style>
 """, unsafe_allow_html=True)
 
+# ──────────────────────────────────────────────────────────
+# SIDEBAR
+# ──────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown(f"<div style=\"font-family:'JetBrains Mono',monospace;color:{T['accent']};font-size:13px;font-weight:700;\">◆ KALYAN.AI</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style=\"font-family:'JetBrains Mono',monospace;color:{T['accent']};font-size:13px;font-weight:700;letter-spacing:1px;\">◆ KALYAN.AI</div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+
     theme_choice = st.radio("Theme", ["dark", "light"], index=0 if st.session_state.theme == "dark" else 1, horizontal=True)
     if theme_choice != st.session_state.theme:
         st.session_state.theme = theme_choice
         st.rerun()
+
     st.markdown("---")
     st.markdown("**Builder**")
     st.markdown("Kundura Kalyan")
     st.markdown("B.Tech CSE (AI/ML) · SVCE")
+    st.markdown("Bengaluru, India")
+
     st.markdown("---")
     st.markdown("**Stack**")
     st.markdown("`Python` `Groq` `LLaMA 3.3`")
+    st.markdown("`Streamlit` `CrewAI` `JobSpy`")
+
     if st.session_state.score_history:
         st.markdown("---")
         avg = sum(s["score"] for s in st.session_state.score_history) / len(st.session_state.score_history)
         st.markdown("**Interview avg**")
         st.markdown(f"<span style='font-family:JetBrains Mono;font-size:24px;color:{T['accent']};font-weight:700;'>{avg:.1f}/10</span>", unsafe_allow_html=True)
+
     st.markdown("---")
     st.markdown("[GitHub Repo →](https://github.com/kundurukalyan945-max/ai-agent-2026)")
+    st.caption(f"Session · {datetime.now().strftime('%H:%M')}")
 
+    st.markdown("---")
+    with st.expander("⚙️ Settings"):
+
+        st.markdown("**Profile**")
+        st.session_state.profile["name"] = st.text_input("Name", value=st.session_state.profile["name"], key="set_name")
+        st.session_state.profile["education"] = st.text_area("Education", value=st.session_state.profile["education"], key="set_edu", height=70)
+        st.session_state.profile["skills"] = st.text_area("Skills", value=st.session_state.profile["skills"], key="set_skills", height=70)
+        st.session_state.profile["project"] = st.text_area("Key project", value=st.session_state.profile["project"], key="set_proj", height=70)
+        st.session_state.profile["target_role"] = st.text_input("Target role", value=st.session_state.profile["target_role"], key="set_role")
+        st.session_state.profile["target_location"] = st.text_input("Target location", value=st.session_state.profile["target_location"], key="set_loc")
+        st.caption("Resume Tailor and Crew agents use this profile.")
+
+        st.markdown("---")
+        st.markdown("**API Keys**")
+
+        def mask_key(key):
+            if not key:
+                return "Not set"
+            if len(key) <= 8:
+                return "****"
+            return f"{key[:4]}{'*' * 8}{key[-4:]}"
+
+        groq_key = os.getenv("GROQ_API_KEY")
+        google_key = os.getenv("GOOGLE_API_KEY")
+        openrouter_key = os.getenv("OPENROUTER_API_KEY")
+
+        st.code(f"GROQ: {mask_key(groq_key)}", language=None)
+        st.code(f"GOOGLE: {mask_key(google_key)}", language=None)
+        st.code(f"OPENROUTER: {mask_key(openrouter_key)}", language=None)
+        st.caption("Keys are loaded from your .env file. Edit .env directly to change them.")
+
+        st.markdown("---")
+        st.markdown("**Data**")
+
+        export_data = {
+            "profile": st.session_state.profile,
+            "chat_history": st.session_state.messages,
+            "score_history": st.session_state.score_history,
+            "exported_at": datetime.now().isoformat()
+        }
+        import json
+        st.download_button(
+            "↓ Export session data (.json)",
+            data=json.dumps(export_data, indent=2),
+            file_name=f"career_suite_export_{datetime.now().strftime('%Y%m%d_%H%M')}.json",
+            mime="application/json",
+            key="export_btn"
+        )
+
+        if st.button("🗑️ Clear chat history", key="clear_chat_btn"):
+            st.session_state.messages = []
+            st.rerun()
+
+        if st.button("🗑️ Clear score history", key="clear_scores_btn"):
+            st.session_state.score_history = []
+            st.rerun()
+
+        if st.button("🗑️ Clear everything", key="clear_all_btn"):
+            st.session_state.messages = []
+            st.session_state.score_history = []
+            st.session_state.last_resume = None
+            st.session_state.job_results = None
+            st.rerun()
+
+# ──────────────────────────────────────────────────────────
+# HEADER
+# ──────────────────────────────────────────────────────────
 st.markdown(f"""
 <div class="suite-header"><span class="suite-mark">◆</span><span class="suite-title">AI Career Suite</span></div>
-<div class="suite-sub"><span class="dot">●</span> ONLINE &nbsp;·&nbsp; built by Kalyan &nbsp;·&nbsp; powered by LLaMA 3.3-70B</div>
+<div class="suite-sub"><span class="dot">●</span> ONLINE &nbsp;·&nbsp; built by Kalyan &nbsp;·&nbsp; powered by LLaMA 3.3-70B via Groq</div>
 """, unsafe_allow_html=True)
 
 c1, c2, c3, c4 = st.columns(4)
@@ -106,9 +240,11 @@ for col, (label, value, accent) in zip([c1, c2, c3, c4], cells):
     col.markdown(f'<div class="status-strip"><div class="status-cell"><div class="status-label">{label}</div><div class="status-value {cls}">{value}</div></div></div>', unsafe_allow_html=True)
 
 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["COACH", "RESUME", "INTERVIEW", "JOBS", "CREW"])
+
 # ══════════════════════════════════════════════════════════
-# TAB 1 — COACH
+# TAB 1 — COACH (with PDF upload + chat bubbles)
 # ══════════════════════════════════════════════════════════
 with tab1:
     st.markdown('<div class="panel-head"><span class="panel-tag">AGENT 01</span><span class="panel-title">Career Coach</span></div><div class="panel-desc">Persistent memory · Upload a PDF to discuss it.</div>', unsafe_allow_html=True)
@@ -139,17 +275,23 @@ with tab1:
         st.session_state.messages.append({"role": "user", "content": prompt})
 
         with st.spinner("Thinking..."):
+            api_messages = [{"role": "system", "content": "You are Kalyan's AI career coach. He is a B.Tech CSE AI/ML student in Bengaluru targeting AI/ML jobs in 2026. Be encouraging, direct, and practical. If PDF context is given, use it to answer."}]
+            for i, m in enumerate(st.session_state.messages):
+                if i == len(st.session_state.messages) - 1 and m["role"] == "user":
+                    api_messages.append({"role": "user", "content": full_prompt})
+                else:
+                    api_messages.append({"role": m["role"], "content": m["content"]})
+
             response = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
-                messages=[{"role": "system", "content": "You are Kalyan's AI career coach. He is a B.Tech CSE AI/ML student in Bengaluru targeting AI/ML jobs in 2026. Be encouraging, direct, and practical. If PDF context is given, use it to answer."}] + 
-                [{"role": m["role"], "content": full_prompt if i == len(st.session_state.messages)-1 and m["role"]=="user" else m["content"]} for i, m in enumerate(st.session_state.messages)]
+                messages=api_messages
             )
             reply = response.choices[0].message.content
             st.session_state.messages.append({"role": "assistant", "content": reply})
         st.rerun()
 
 # ══════════════════════════════════════════════════════════
-# TAB 2 — RESUME
+# TAB 2 — RESUME (with download)
 # ══════════════════════════════════════════════════════════
 with tab2:
     st.markdown('<div class="panel-head"><span class="panel-tag">AGENT 02</span><span class="panel-title">Resume Tailor</span></div><div class="panel-desc">Paste a job description. Download as .txt or .docx.</div>', unsafe_allow_html=True)
@@ -163,9 +305,10 @@ with tab2:
                     model="llama-3.3-70b-versatile",
                     messages=[
                         {"role": "system", "content": "You are an expert ATS resume writer."},
-                        {"role": "user", "content": f"""My resume: B.Tech CSE AI/ML, SVCE Bengaluru 2026, CGPA 7.3.
-Project: Deep Learning Object Detection for Visually Impaired (YOLOv8, TTS, Streamlit, 93-95% accuracy).
-Skills: Python, ML, Deep Learning, LangChain, Groq API, AI Agents.
+                        {"role": "user", "content": f"""My resume: {st.session_state.profile['education']}.
+Project: {st.session_state.profile['project']}.
+Skills: {st.session_state.profile['skills']}.
+Target role: {st.session_state.profile['target_role']} in {st.session_state.profile['target_location']}.
 
 Job description: {job_desc}
 
@@ -181,9 +324,15 @@ Give me:
 
     if st.session_state.last_resume:
         st.markdown(f'<div class="output-card"><div class="output-card-label">● output ready</div>{st.session_state.last_resume}</div>', unsafe_allow_html=True)
+
         dl1, dl2 = st.columns(2)
         with dl1:
-            st.download_button("↓ Download as .txt", data=st.session_state.last_resume, file_name=f"tailored_resume_{datetime.now().strftime('%Y%m%d')}.txt", mime="text/plain")
+            st.download_button(
+                "↓ Download as .txt",
+                data=st.session_state.last_resume,
+                file_name=f"tailored_resume_{datetime.now().strftime('%Y%m%d')}.txt",
+                mime="text/plain"
+            )
         with dl2:
             try:
                 from docx import Document
@@ -195,10 +344,16 @@ Give me:
                 buf = io.BytesIO()
                 doc.save(buf)
                 buf.seek(0)
-                st.download_button("↓ Download as .docx", data=buf, file_name=f"tailored_resume_{datetime.now().strftime('%Y%m%d')}.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+                st.download_button(
+                    "↓ Download as .docx",
+                    data=buf,
+                    file_name=f"tailored_resume_{datetime.now().strftime('%Y%m%d')}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                )
             except ImportError:
-                st.caption("Run: pip install python-docx")
-                # ══════════════════════════════════════════════════════════
+                st.caption("Run: pip install python-docx for Word download")
+
+# ══════════════════════════════════════════════════════════
 # TAB 3 — INTERVIEW (with progress tracker)
 # ══════════════════════════════════════════════════════════
 with tab3:
@@ -230,7 +385,11 @@ with tab3:
                 score_line = [l for l in lines if 'SCORE' in l]
                 if score_line:
                     score = int(score_line[0].split('/')[0].replace('SCORE:', '').strip())
-                    st.session_state.score_history.append({"time": datetime.now().strftime("%H:%M:%S"), "question": question[:30] + "...", "score": score})
+                    st.session_state.score_history.append({
+                        "time": datetime.now().strftime("%H:%M:%S"),
+                        "question": question[:30] + "...",
+                        "score": score
+                    })
                     css_class = "score-high" if score >= 7 else "score-mid" if score >= 5 else "score-low"
                     st.markdown(f'<div class="score-badge {css_class}">{score_line[0].strip()}</div>', unsafe_allow_html=True)
                     feedback_clean = '\n'.join([l for l in lines if 'SCORE' not in l])
@@ -258,10 +417,17 @@ with tab4:
         search_btn = st.button("Search jobs", key="job_search_btn")
 
     if search_btn:
-        with st.spinner("Searching Indeed... (~30 sec)"):
+        with st.spinner("Searching Indeed and Glassdoor... (~30 sec)"):
             try:
                 from jobspy import scrape_jobs
-                jobs = scrape_jobs(site_name=["indeed"], search_term=search_term, location="Bengaluru, India", results_wanted=15, hours_old=72, country_indeed="India")
+                jobs = scrape_jobs(
+                    site_name=["indeed"],
+                    search_term=search_term,
+                    location="Bengaluru, India",
+                    results_wanted=15,
+                    hours_old=72,
+                    country_indeed="India"
+                )
                 if not jobs.empty:
                     st.session_state.job_results = jobs[["title", "company", "location", "date_posted", "job_url"]].copy()
                 else:
@@ -273,7 +439,12 @@ with tab4:
 
     if st.session_state.job_results is not None:
         st.markdown(f'<div class="output-card-label" style="margin-top:18px;">● {len(st.session_state.job_results)} jobs found</div>', unsafe_allow_html=True)
-        st.dataframe(st.session_state.job_results, use_container_width=True, hide_index=True, column_config={"job_url": st.column_config.LinkColumn("Apply Link")})
+        st.dataframe(
+            st.session_state.job_results,
+            use_container_width=True,
+            hide_index=True,
+            column_config={"job_url": st.column_config.LinkColumn("Apply Link")}
+        )
         csv = st.session_state.job_results.to_csv(index=False).encode('utf-8')
         st.download_button("↓ Download as CSV", data=csv, file_name=f"jobs_{datetime.now().strftime('%Y%m%d')}.csv", mime="text/csv")
 
@@ -292,11 +463,32 @@ with tab5:
     if st.button("Launch crew", key="crew_btn"):
         if crew_company and crew_role:
             progress = st.progress(0, text="Agent 1 — Researching company...")
-            research = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": "You are an expert job market researcher."}, {"role": "user", "content": f"Research {crew_company} for someone applying for {crew_role}. Cover: what they do, tech stack, culture, what they look for in candidates, top 5 resume keywords."}]).choices[0].message.content
+
+            research = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": "You are an expert job market researcher."},
+                    {"role": "user", "content": f"Research {crew_company} for someone applying for {crew_role}. Cover: what they do, tech stack, culture, what they look for in candidates, top 5 resume keywords."}
+                ]
+            ).choices[0].message.content
             progress.progress(33, text="Agent 2 — Tailoring resume...")
-            resume = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": "You are an ATS resume expert."}, {"role": "user", "content": f"Based on this research:\n{research}\n\nTailor Kalyan's resume for {crew_role} at {crew_company}. Kalyan: B.Tech CSE AI/ML, AI Career Suite builder, YOLOv8 project (93-95% accuracy), Python/ML/LangChain/Groq skills, SmartBridge/JPMorgan/Deloitte internships. Give: 3-line summary, 5 bullet points, 8 ATS keywords."}]).choices[0].message.content
+
+            resume = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": "You are an ATS resume expert."},
+                    {"role": "user", "content": f"Based on this research:\n{research}\n\nTailor Kalyan's resume for {crew_role} at {crew_company}. Kalyan: B.Tech CSE AI/ML, AI Career Suite builder, YOLOv8 project (93-95% accuracy), Python/ML/LangChain/Groq skills, SmartBridge/JPMorgan/Deloitte internships. Give: 3-line summary, 5 bullet points, 8 ATS keywords."}
+                ]
+            ).choices[0].message.content
             progress.progress(66, text="Agent 3 — Preparing interview...")
-            interview = client.chat.completions.create(model="llama-3.3-70b-versatile", messages=[{"role": "system", "content": "You are a senior technical interview coach."}, {"role": "user", "content": f"Using this research:\n{research}\n\nAnd resume:\n{resume}\n\nPrepare Kalyan for {crew_role} interview at {crew_company}: top 5 technical questions with answers, top 3 behavioral questions with STAR answers, 3 smart questions to ask, one insider tip."}]).choices[0].message.content
+
+            interview = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[
+                    {"role": "system", "content": "You are a senior technical interview coach."},
+                    {"role": "user", "content": f"Using this research:\n{research}\n\nAnd resume:\n{resume}\n\nPrepare Kalyan for {crew_role} interview at {crew_company}: top 5 technical questions with answers, top 3 behavioral questions with STAR answers, 3 smart questions to ask, one insider tip."}
+                ]
+            ).choices[0].message.content
             progress.progress(100, text="Done!")
 
             st.markdown(f'<div class="output-card"><div class="output-card-label">● agent 1 — research</div>{research}</div>', unsafe_allow_html=True)
@@ -306,4 +498,4 @@ with tab5:
             full_report = f"CREW REPORT: {crew_role} at {crew_company}\n\n=== RESEARCH ===\n{research}\n\n=== RESUME ===\n{resume}\n\n=== INTERVIEW PREP ===\n{interview}"
             st.download_button("↓ Download full report", data=full_report, file_name=f"crew_{crew_company}_{crew_role}.txt".replace(" ", "_"), mime="text/plain")
         else:
-            st.warning("Enter both company and role.")
+            st.warning("Enter both company and role.")s
