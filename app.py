@@ -498,4 +498,4 @@ with tab5:
             full_report = f"CREW REPORT: {crew_role} at {crew_company}\n\n=== RESEARCH ===\n{research}\n\n=== RESUME ===\n{resume}\n\n=== INTERVIEW PREP ===\n{interview}"
             st.download_button("↓ Download full report", data=full_report, file_name=f"crew_{crew_company}_{crew_role}.txt".replace(" ", "_"), mime="text/plain")
         else:
-            st.warning("Enter both company and role.")s
+            st.warning("Enter both company and role.")
