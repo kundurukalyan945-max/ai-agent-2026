@@ -1,1 +1,7 @@
 .env
+__pycache__/
+*.pyc
+jobs_*.csv
+tailored_resume.txt
+crew_*.txt
+.DS_Store
