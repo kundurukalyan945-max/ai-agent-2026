@@ -2,13 +2,14 @@
 
 **An open-source AI-powered career toolkit** — coach, resume tailor, interview prep, job scraper, and multi-agent research, all in one app. Built solo, runs on free APIs, deployed live.
 
-🔗 **[Live Demo →](https://ai-agent-2026-cttqmjzrumpwju6psuzkqv.streamlit.app)**
-🌐 **[Web App →](https://ai-suit-web.vercel.app)** — mobile + desktop, no install needed
+🌐 **[Web App →](https://ai-suit-web.vercel.app)** — works on mobile + desktop, no install needed
+🔗 **[Streamlit Demo →](https://ai-agent-2026-cttqmjzrumpwju6psuzkqv.streamlit.app)**
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Groq](https://img.shields.io/badge/LLM-Groq%20LLaMA%203.3-orange)
+![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel)
 
 ---
 
@@ -26,18 +27,28 @@ Plus: dark/light theme toggle, editable profile (used across all agents), masked
 
 ---
 
-## Tech stack
+## Live Deployments
 
-- **Python 3.12**
-- **Streamlit** — UI framework
-- **Groq API** (LLaMA 3.3-70B) — fast, free-tier LLM inference
-- **JobSpy** — live job scraping
-- **python-docx**, **pypdf** — document generation and reading
-- **Pandas** — data handling
+| Version | URL | Stack |
+|---|---|---|
+| 🌐 Web App | [ai-suit-web.vercel.app](https://ai-suit-web.vercel.app) | HTML + JS + Vercel |
+| 🐍 Streamlit App | [streamlit deploy](https://ai-agent-2026-cttqmjzrumpwju6psuzkqv.streamlit.app) | Python + Streamlit Cloud |
 
 ---
 
-## Run it locally
+## Tech stack
+
+- **Python 3.12** + **Streamlit** — original app
+- **HTML/CSS/JS** — web app (zero frameworks, pure vanilla)
+- **Groq API** (LLaMA 3.3-70B) — fast, free-tier LLM inference
+- **JobSpy** — live job scraping
+- **python-docx**, **pypdf**, **PDF.js** — document handling
+- **Pandas** — data handling
+- **Vercel** — web deployment
+
+---
+
+## Run it locally (Python/Streamlit version)
 
 ```bash
 git clone https://github.com/kundurukalyan945-max/ai-agent-2026.git
@@ -46,11 +57,33 @@ pip install -r requirements.txt
 ```
 
 Create a `.env` file in the root folder:
+
+```
+GROQ_API_KEY=your_key_here
+```
+
+Get a free Groq API key at [console.groq.com](https://console.groq.com) — takes 30 seconds.
+
+Then run:
+
+```bash
+streamlit run app.py
+```
+
+## Run it locally (Web version)
+
+Just open `ai-suit-web/index.html` in any browser. Enter your Groq API key in Settings when prompted. No server needed.
+
 ---
 
-## Why I built this
+## About the builder
 
-I'm a final-year B.Tech CSE (AI/ML) student in Bengaluru, building this as both a learning project and a real tool for my own job search — every agent here is something I personally use to prep for AI/ML interviews. Built entirely with free tools.
+**Kundura Kalyan** — final-year B.Tech CSE (AI/ML) student at SVCE Bengaluru, graduating 2026.
+
+I built this as both a real learning project and a tool I personally use for my own AI/ML job search. Every agent here solves a real problem I faced — tailoring resumes for each JD, practicing interview answers, tracking which companies to target. Built entirely with free tools.
+
+- 🔗 [LinkedIn](https://www.linkedin.com/in/kalyan-kunduru-84487b287)
+- 💻 [GitHub](https://github.com/kundurukalyan945-max)
 
 ---
 
@@ -62,8 +95,4 @@ Issues and PRs welcome. If you use this for your own job search, I'd love to hea
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Free to use, modify, and share.
-
----
-
-**Built by [Kundura Kalyan](https://www.linkedin.com/in/kalyan-kunduru-84487b287)** · [GitHub](https://github.com/kundurukalyan945-max)
+MIT — see [LICENSE](LICENSE). Free to use, modify, and share with attribution.
