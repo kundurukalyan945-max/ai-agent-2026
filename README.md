@@ -3,6 +3,7 @@
 **An open-source AI-powered career toolkit** — coach, resume tailor, interview prep, job scraper, and multi-agent research, all in one app. Built solo, runs on free APIs, deployed live.
 
 🔗 **[Live Demo →](https://ai-agent-2026-cttqmjzrumpwju6psuzkqv.streamlit.app)**
+🌐 **[Web App →](https://ai-suit-web.vercel.app)** — mobile + desktop, no install needed
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)
@@ -45,4 +46,24 @@ pip install -r requirements.txt
 ```
 
 Create a `.env` file in the root folder:
+---
 
+## Why I built this
+
+I'm a final-year B.Tech CSE (AI/ML) student in Bengaluru, building this as both a learning project and a real tool for my own job search — every agent here is something I personally use to prep for AI/ML interviews. Built entirely with free tools.
+
+---
+
+## Contributing
+
+Issues and PRs welcome. If you use this for your own job search, I'd love to hear about it — open an issue and say hi.
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE). Free to use, modify, and share.
+
+---
+
+**Built by [Kundura Kalyan](https://www.linkedin.com/in/kalyan-kunduru-84487b287)** · [GitHub](https://github.com/kundurukalyan945-max)
