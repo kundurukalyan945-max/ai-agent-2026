@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Career Suite — Kalyan</title>
+<title>AI Career Suite</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -252,10 +252,10 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,106,26,0.2
 
     <div class="sidebar-footer">
       <div class="user-card">
-        <div class="avatar">KK</div>
+        <div class="avatar" id="sidebar-avatar">AI</div>
         <div>
-          <div class="user-name">Kundura Kalyan</div>
-          <div class="user-role">B.Tech CSE AI/ML · SVCE</div>
+          <div class="user-name" id="sidebar-name">Set your name in Settings</div>
+          <div class="user-role" id="sidebar-role">Career Toolkit</div>
         </div>
       </div>
     </div>
@@ -268,7 +268,7 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,106,26,0.2
     <!-- Mobile header -->
     <div class="mobile-header">
       <button class="hamburger" onclick="openSidebar()">☰</button>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);font-weight:700">◆ KALYAN.AI</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);font-weight:700">◆ AI CAREER SUITE</div>
       <div style="width:36px"></div>
     </div>
 
@@ -290,7 +290,7 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,106,26,0.2
         <div class="page-header">
           <div class="page-eyebrow">◆ AGENT 01</div>
           <div class="page-title">Career Coach</div>
-          <div class="page-desc">Persistent memory · Upload any PDF to discuss it · Ask anything about your career.</div>
+          <div class="page-desc">Chat with an AI career coach. Upload a PDF (resume, job posting) to discuss it. History is saved in this browser only — it resets if you clear browser data.</div>
         </div>
 
         <div class="card">
@@ -309,9 +309,9 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,106,26,0.2
         <div class="card" style="padding:16px">
           <div class="chat-wrap">
             <div class="chat-messages" id="chat-messages">
-              <div class="msg ai">
+              <div class="msg ai" id="greeting-msg">
                 <div class="msg-avatar">AI</div>
-                <div class="bubble">Hey Kalyan! I'm your AI career coach. I know your background — B.Tech CSE AI/ML at SVCE, your AI Career Suite project, YOLOv8 object detection work, and your goal of landing an AI/ML role in Bengaluru.<br><br>Upload a PDF (resume, job posting) or just ask me anything. What's on your mind?</div>
+                <div class="bubble">Hi! I'm your AI career coach. Update your profile in Settings so I can give you personalised advice.<br><br>Upload a PDF (resume, job posting) or ask me anything about your career, job search, or interview prep.</div>
               </div>
             </div>
             <div class="chat-input-wrap">
@@ -327,13 +327,13 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,106,26,0.2
         <div class="page-header">
           <div class="page-eyebrow">◆ AGENT 02</div>
           <div class="page-title">Resume Tailor</div>
-          <div class="page-desc">Paste a job description → get ATS keywords, tailored bullets, and a summary. Download as .txt or .docx.</div>
+          <div class="page-desc">Paste a job description → get ATS keywords, tailored bullets, and a summary. Download as .txt.</div>
         </div>
 
         <div class="stats-strip">
           <div class="stat-cell"><div class="stat-label">Mode</div><div class="stat-value accent">ATS Optimized</div></div>
           <div class="stat-cell"><div class="stat-label">Model</div><div class="stat-value">LLaMA 3.3 70B</div></div>
-          <div class="stat-cell"><div class="stat-label">Output</div><div class="stat-value">.txt · .docx</div></div>
+          <div class="stat-cell"><div class="stat-label">Output</div><div class="stat-value">.txt</div></div>
         </div>
 
         <div class="card">
@@ -353,8 +353,7 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,106,26,0.2
             <div class="output-text" id="resume-result"></div>
           </div>
           <div class="dl-row">
-            <button class="btn btn-ghost btn-sm" onclick="downloadResume('txt')">↓ Download .txt</button>
-            <button class="btn btn-ghost btn-sm" onclick="downloadResume('docx')">↓ Download .docx</button>
+            <button class="btn btn-ghost btn-sm" onclick="downloadResume()">↓ Download .txt</button>
           </div>
         </div>
       </div>
@@ -418,7 +417,7 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,106,26,0.2
         <div class="page-header">
           <div class="page-eyebrow">◆ AGENT 04</div>
           <div class="page-title">Job Scraper</div>
-          <div class="page-desc">This app is deployed — for live job scraping, use the Python backend. Below shows your saved results.</div>
+          <div class="page-desc">Live scraping requires the Python/Streamlit backend. This web version shows <strong>sample data only</strong> — run <code>streamlit run app.py</code> locally for real results.</div>
         </div>
 
         <div class="card">
@@ -550,11 +549,12 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,106,26,0.2
                 <span id="key-display">Not set</span>
                 <span class="key-status" id="key-status-badge">Missing</span>
               </div>
-              <div style="margin-top:8px;display:flex;gap:8px">
+              <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
                 <input type="password" id="new-api-key" placeholder="gsk_...">
                 <button class="btn btn-primary btn-sm" onclick="saveApiKey()" style="white-space:nowrap">Save Key</button>
+                <button class="btn btn-ghost btn-sm" onclick="removeApiKey()" style="white-space:nowrap">Remove Key</button>
               </div>
-              <div style="font-size:11px;color:var(--text3);margin-top:6px">Free at <a href="https://console.groq.com" target="_blank" style="color:var(--accent)">console.groq.com</a> — key stored in your browser only.</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:6px">Free at <a href="https://console.groq.com" target="_blank" style="color:var(--accent)">console.groq.com</a> — key stored in your browser's localStorage only, never sent anywhere except api.groq.com.</div>
             </div>
           </div>
 
@@ -562,28 +562,28 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,106,26,0.2
             <div class="setting-title">Your Profile</div>
             <div class="setting-row">
               <label>Name</label>
-              <input type="text" id="set-name" value="Kundura Kalyan">
+              <input type="text" id="set-name" placeholder="Your full name">
             </div>
             <div class="setting-row">
               <label>Education</label>
-              <input type="text" id="set-edu" value="B.Tech CSE (AI/ML), SVCE Bengaluru, 2026, CGPA 7.3">
+              <input type="text" id="set-edu" placeholder="e.g. B.Tech CSE, University, Year, CGPA">
             </div>
             <div class="setting-row">
               <label>Skills</label>
-              <textarea id="set-skills" rows="2">Python, ML, Deep Learning, LangChain, Groq API, AI Agents, Streamlit, YOLOv8</textarea>
+              <textarea id="set-skills" rows="2" placeholder="e.g. Python, ML, Deep Learning, LangChain, FastAPI..."></textarea>
             </div>
             <div class="setting-row">
               <label>Key Project</label>
-              <textarea id="set-project" rows="2">Deep Learning Object Detection for Visually Impaired (YOLOv8, TTS, Streamlit, 93-95% accuracy, ACMETECH-2K26)</textarea>
+              <textarea id="set-project" rows="2" placeholder="Your main project — name, tech stack, outcome..."></textarea>
             </div>
             <div class="grid-2">
               <div class="setting-row">
                 <label>Target Role</label>
-                <input type="text" id="set-role" value="AI/ML Engineer">
+                <input type="text" id="set-role" placeholder="e.g. AI/ML Engineer">
               </div>
               <div class="setting-row">
                 <label>Target Location</label>
-                <input type="text" id="set-location" value="Bengaluru">
+                <input type="text" id="set-location" placeholder="e.g. Bengaluru">
               </div>
             </div>
             <button class="btn btn-primary btn-sm" onclick="saveProfile()">Save Profile</button>
@@ -621,12 +621,12 @@ const state = {
   lastResume: '',
   lastCrewReport: '',
   profile: JSON.parse(localStorage.getItem('profile') || JSON.stringify({
-    name: 'Kundura Kalyan',
-    education: 'B.Tech CSE (AI/ML), SVCE Bengaluru, 2026, CGPA 7.3',
-    skills: 'Python, ML, Deep Learning, LangChain, Groq API, AI Agents, Streamlit, YOLOv8',
-    project: 'Deep Learning Object Detection for Visually Impaired (YOLOv8, TTS, Streamlit, 93-95% accuracy, ACMETECH-2K26)',
-    targetRole: 'AI/ML Engineer',
-    targetLocation: 'Bengaluru'
+    name: 'Your Name',
+    education: 'Your degree, university, year (edit in Settings)',
+    skills: 'List your skills here (edit in Settings)',
+    project: 'Your key project (edit in Settings)',
+    targetRole: 'Your target role',
+    targetLocation: 'Your target city'
   }))
 };
 
@@ -682,10 +682,19 @@ function saveApiKey() {
   const key = (document.getElementById('new-api-key')?.value || document.getElementById('api-key-input')?.value || '').trim();
   if (!key) { showToast('Enter a key first'); return; }
   state.apiKey = key;
+  // The key is stored in this browser's localStorage so you can reuse it across sessions.
+  // It is never sent to any server other than api.groq.com.
+  // Clear it at any time using the "Remove key" button in Settings.
   localStorage.setItem('groq_api_key', key);
   document.getElementById('api-prompt').style.display = 'none';
   updateKeyDisplay();
-  showToast('✓ API key saved');
+  showToast('✓ API key saved to browser storage');
+}
+function removeApiKey() {
+  state.apiKey = '';
+  localStorage.removeItem('groq_api_key');
+  updateKeyDisplay();
+  showToast('✓ API key removed');
 }
 function updateKeyDisplay() {
   const key = state.apiKey;
@@ -706,6 +715,13 @@ function restoreProfile() {
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
   set('set-name', p.name); set('set-edu', p.education); set('set-skills', p.skills);
   set('set-project', p.project); set('set-role', p.targetRole); set('set-location', p.targetLocation);
+  // Update sidebar display
+  const nameEl = document.getElementById('sidebar-name');
+  const roleEl = document.getElementById('sidebar-role');
+  const avatarEl = document.getElementById('sidebar-avatar');
+  if (nameEl) nameEl.textContent = p.name || 'Your Name';
+  if (roleEl) roleEl.textContent = (p.targetRole || 'Job Seeker') + ' · ' + (p.targetLocation || '');
+  if (avatarEl) avatarEl.textContent = (p.name || 'U').charAt(0).toUpperCase();
 }
 function saveProfile() {
   state.profile = {
@@ -717,6 +733,7 @@ function saveProfile() {
     targetLocation: document.getElementById('set-location').value
   };
   localStorage.setItem('profile', JSON.stringify(state.profile));
+  restoreProfile();
   showToast('✓ Profile saved — all agents updated');
 }
 
@@ -830,14 +847,14 @@ async function tailorResume() {
     document.getElementById('resume-output').style.display = 'block';
   }
 }
-function downloadResume(fmt) {
+function downloadResume() {
   if (!state.lastResume) return;
   const blob = new Blob([state.lastResume], { type: 'text/plain' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'tailored_resume_' + today() + '.' + fmt;
+  a.download = 'tailored_resume_' + today() + '.txt';
   a.click();
-  showToast('✓ Downloaded as .' + fmt);
+  showToast('✓ Downloaded as .txt');
 }
 
 // ── INTERVIEW ──
@@ -864,7 +881,8 @@ async function scoreAnswer() {
   let score = 0;
   if (scoreLine) score = parseInt(scoreLine.replace('SCORE:', '').split('/')[0].trim()) || 0;
   const css = score >= 7 ? 'score-high' : score >= 5 ? 'score-mid' : 'score-low';
-  document.getElementById('score-badge-wrap').innerHTML = `<div class="score-badge ${css}">${scoreLine || 'SCORE: ' + score + '/10'}</div>`;
+  const scoreDisplay = escHtml(scoreLine || ('SCORE: ' + score + '/10'));
+  document.getElementById('score-badge-wrap').innerHTML = `<div class="score-badge ${css}">${scoreDisplay}</div>`;
   document.getElementById('score-feedback').textContent = lines.filter(l => !l.includes('SCORE')).join('\n').trim();
   document.getElementById('score-output').style.display = 'block';
   const entry = { time: new Date().toLocaleTimeString(), question: q.slice(0, 35) + '...', score };
@@ -876,7 +894,7 @@ async function scoreAnswer() {
 function renderScoreTable() {
   const t = state.scores.slice(-8).reverse().map(s => {
     const c = s.score >= 7 ? 'var(--green)' : s.score >= 5 ? 'var(--yellow)' : 'var(--red)';
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--text2)">${s.question}</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${c}">${s.score}/10</span></div>`;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="color:var(--text2)">${escHtml(s.question)}</span><span style="font-family:'JetBrains Mono',monospace;font-weight:700;color:${c}">${s.score}/10</span></div>`;
   }).join('');
   document.getElementById('score-history-table').innerHTML = t;
 }
@@ -903,7 +921,7 @@ async function scrapeJobs() {
   ];
   const tbody = document.getElementById('jobs-tbody');
   tbody.innerHTML = sampleJobs.map(j => `<tr><td>${j.title}</td><td>${j.company}</td><td>${j.location}</td><td>${j.date}</td><td><a class="job-link" href="${j.url}" target="_blank">Apply →</a></td></tr>`).join('');
-  document.getElementById('jobs-count').textContent = sampleJobs.length + ' jobs found (sample)';
+  document.getElementById('jobs-count').textContent = '⚠ SAMPLE DATA — ' + sampleJobs.length + ' demo results (not live)';
   document.getElementById('jobs-output').style.display = 'block';
 }
 function downloadJobsCsv() {
