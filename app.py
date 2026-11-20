@@ -939,6 +939,35 @@ with tab6:
             key="career_radar_csv",
             help="Expected columns include title, company, location and job_url/url; description and date_posted are optional."
         )
+        radar_csv_text = st.text_area(
+            "Or paste the CSV block from your 9 AM Daily Job Radar",
+            height=100,
+            key="career_radar_csv_text",
+            help="Paste the CSV header and rows only (without Markdown code fences)."
+        )
+        if st.button("Import pasted Daily Job Radar CSV", key="career_import_csv_text"):
+            if not radar_csv_text.strip():
+                st.warning("Paste CSV rows first.")
+            else:
+                try:
+                    pasted_frame = pd.read_csv(io.StringIO(radar_csv_text)).fillna("")
+                    imported_text = 0
+                    for _, pasted_row in pasted_frame.iterrows():
+                        row_dict = pasted_row.to_dict()
+                        add_job({
+                            "title": row_dict.get("title") or row_dict.get("job_title", ""),
+                            "company": row_dict.get("company") or row_dict.get("employer", ""),
+                            "location": row_dict.get("location", ""),
+                            "work_mode": row_dict.get("work_mode", ""),
+                            "url": row_dict.get("job_url") or row_dict.get("url", ""),
+                            "description": row_dict.get("description") or row_dict.get("job_description", ""),
+                            "date_posted": row_dict.get("date_posted", ""),
+                            "source": row_dict.get("source") or "Daily Job Radar",
+                        })
+                        imported_text += 1
+                    st.success(f"Imported/refreshed {imported_text} pasted CSV rows.")
+                except Exception as exc:
+                    st.error(f"Pasted CSV could not be imported: {exc}")
         if radar_csv is not None:
             if st.button("Import uploaded job CSV", key="career_import_csv"):
                 try:
