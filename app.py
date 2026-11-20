@@ -865,7 +865,7 @@ with tab6:
             else legacy_profile.get("name")
         ),
         "education": (
-            "B.Tech CSE (AI & ML), Sri Venkateswara College of Engineering, Bengaluru (2026); CGPA 7.3"
+            "B.Tech, Computer Science & Engineering (AI/ML), Sri Venkateswara College of Engineering, Tirupati; graduated May 2026; CGPA 7.3/10"
             if legacy_profile.get("education", "").startswith("Degree, University")
             else legacy_profile.get("education", "")
         ),
