@@ -10,6 +10,7 @@ import json
 import os
 import sqlite3
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -26,7 +27,8 @@ def database_path() -> Path:
     return Path(__file__).resolve().parents[1] / "career_agent.sqlite3"
 
 
-def _connect() -> sqlite3.Connection:
+@contextmanager
+def _connect():
     path = database_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path, timeout=15)
@@ -34,7 +36,14 @@ def _connect() -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     conn.execute("PRAGMA journal_mode = WAL")
     _initialize(conn)
-    return conn
+    try:
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def _initialize(conn: sqlite3.Connection) -> None:
