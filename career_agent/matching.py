@@ -72,8 +72,17 @@ def score_job(job: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
     targets = profile.get("target_roles", [])
     if isinstance(targets, str):
         targets = [x.strip() for x in re.split(r"[,\n]", targets) if x.strip()]
-    role_hits = sum(1 for target in targets if _text(target) and _text(target) in title)
-    role_points = min(20.0, 20.0 * role_hits / max(1, len(targets))) if targets else 10.0
+    title_tokens = set(re.findall(r"[a-z0-9]+", title))
+    role_fit = max(
+        (
+            len(title_tokens & set(re.findall(r"[a-z0-9]+", _text(target))))
+            / max(1, len(set(re.findall(r"[a-z0-9]+", _text(target)))))
+            for target in targets if _text(target)
+        ),
+        default=0.0,
+    )
+    role_alignment = round(role_fit * 100)
+    role_points = 20.0 * role_fit if targets else 10.0
 
     location = _text(job.get("location"))
     target_locations = profile.get("target_locations", ["Bengaluru", "Hyderabad"])
@@ -101,10 +110,11 @@ def score_job(job: dict[str, Any], profile: dict[str, Any]) -> dict[str, Any]:
         f"{len(matched)} of {len(required_skills)} detected skills overlap" if required_skills
         else "No explicit skills were detected in the job text",
         "Target location matches" if location_points == 15 else "Location match is uncertain or outside target cities",
-        "Target role matches" if role_hits else "Role title does not exactly match a saved target role",
+        f"Target-role title overlap is {role_alignment}%" if role_alignment else "Role title has no token overlap with saved target roles",
     ]
     return {
         "score": score,
+        "role_alignment": role_alignment,
         "matched_skills": matched,
         "skill_gaps": gaps,
         "reasons": reasons,
