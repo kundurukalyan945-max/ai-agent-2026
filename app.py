@@ -12,6 +12,13 @@ from datetime import datetime
 
 import pandas as pd
 
+from career_agent import (
+    add_job, create_approval, decide_approval, get_profile, list_approvals,
+    list_audit_events, list_jobs, save_profile,
+)
+from career_agent.matching import score_job
+from career_agent.happenstance import connection_status, referral_search_prompt
+
 load_dotenv()
 
 # ──────────────────────────────────────────────────────────
@@ -321,7 +328,7 @@ st.markdown(
 
 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["Career Coach", "Resume Tailor", "Interview Prep", "Job Search", "Crew"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["Career Coach", "Resume Tailor", "Interview Prep", "Job Search", "Crew", "Career Agent"])
 
 
 # ══════════════════════════════════════════════════════════
@@ -833,3 +840,421 @@ with tab5:
                 file_name=f"crew_{crew_company.replace(' ', '_')}_{crew_role.replace(' ', '_')}.txt",
                 mime="text/plain",
             )
+
+
+# ══════════════════════════════════════════════════════════
+# TAB 6 — PERSISTENT CAREER AGENT
+# ══════════════════════════════════════════════════════════
+with tab6:
+    st.markdown(
+        '<div class="panel-head">'
+        f'<span class="panel-tag">CAREER OS</span>'
+        '<span class="panel-title">Personal Career Agent</span>'
+        '</div>'
+        '<div class="panel-desc">'
+        'Persistent job tracking, transparent matching, application-pack preparation, '
+        'referral research and an auditable approval queue. External actions are not executed by this release.'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    profile_defaults = {
+        "name": st.session_state.profile.get("name", "Kalyan Kunduru"),
+        "education": st.session_state.profile.get(
+            "education", "B.Tech CSE (AI & ML), Sri Venkateswara College of Engineering, Bengaluru (2026); CGPA 7.3"
+        ),
+        "skills": st.session_state.profile.get(
+            "skills", "Python, SQL, Java, Machine Learning, Deep Learning, YOLOv8, LangChain, Groq API, Streamlit, Pandas, NumPy"
+        ),
+        "projects": st.session_state.profile.get(
+            "project", "AI Career Suite (multi-agent career toolkit, Streamlit and web deployment); YOLOv8 object detection with offline text-to-speech pipeline"
+        ),
+        "experience": "Entry-level / fresher; internships and project experience as listed in my verified resume",
+        "years_experience": 0,
+        "target_roles": [
+            "AI Engineer", "Python Developer", "Generative AI Engineer",
+            "Junior Data Scientist", "Machine Learning Engineer",
+            "LLM Engineer", "AI Application Developer", "Python Backend Developer"
+        ],
+        "target_locations": ["Bengaluru", "Hyderabad"],
+        "salary_min_lpa": 4,
+        "salary_max_lpa": 8,
+    }
+    try:
+        saved_profile = get_profile()
+        if not saved_profile:
+            saved_profile = profile_defaults
+            save_profile(saved_profile)
+    except Exception as exc:
+        st.error(f"Career database could not be opened: {exc}")
+        saved_profile = profile_defaults
+
+    sub_overview, sub_jobs, sub_network, sub_review, sub_profile = st.tabs(
+        ["Overview", "Job Pipeline", "Network & Referrals", "Approval Queue", "Candidate Profile"]
+    )
+
+    with sub_overview:
+        all_jobs = list_jobs()
+        pending_items = list_approvals("pending")
+        approved_items = list_approvals("approved")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Saved jobs", len(all_jobs))
+        c2.metric("Awaiting review", len(pending_items))
+        c3.metric("Approved drafts", len(approved_items))
+        st.info(
+            "Safety boundary: this app can research, score, draft and record your approval. "
+            "It does not submit applications or send recruiter messages. Approval is not execution."
+        )
+        st.markdown("**Daily Job Radar integration**")
+        st.write(
+            "Your existing 9:00 AM Daily Fresher Job Radar remains active. "
+            "Use Job Pipeline → Import current Job Search results for one-click intake from the existing scraper, "
+            "or add a verified job URL manually. The scheduled radar remains the broader daily discovery source."
+        )
+        if os.getenv("CAREER_DB_PATH"):
+            st.caption(f"Database path configured: {os.getenv('CAREER_DB_PATH')}")
+        else:
+            st.warning(
+                "Storage note: SQLite currently saves to the app filesystem. "
+                "For Streamlit Cloud persistence across rebuilds/restarts, configure CAREER_DB_PATH "
+                "to a durable mounted volume or migrate this adapter to hosted PostgreSQL/Supabase."
+            )
+
+    with sub_jobs:
+        st.markdown("### Add jobs to your pipeline")
+        current_results = st.session_state.get("job_results")
+        if current_results is not None and hasattr(current_results, "empty") and not current_results.empty:
+            if st.button("Import current Job Search results", key="career_import_job_results"):
+                imported = 0
+                for _, row in current_results.iterrows():
+                    try:
+                        add_job({
+                            "title": row.get("title", ""),
+                            "company": row.get("company", ""),
+                            "location": row.get("location", ""),
+                            "url": row.get("job_url", ""),
+                            "date_posted": row.get("date_posted", ""),
+                            "source": "AI Career Suite Job Search",
+                        })
+                        imported += 1
+                    except Exception:
+                        continue
+                st.success(f"Imported/refreshed {imported} job records. URL duplicates are updated, not duplicated.")
+
+        with st.form("career_add_job_form", clear_on_submit=True):
+            left, right = st.columns(2)
+            with left:
+                manual_title = st.text_input("Job title", placeholder="Junior Python Developer")
+                manual_company = st.text_input("Company", placeholder="Company name")
+                manual_location = st.text_input("Location", placeholder="Hyderabad / Bengaluru")
+            with right:
+                manual_url = st.text_input("Official job URL", placeholder="https://company.com/careers/job-id")
+                manual_mode = st.selectbox("Work mode", ["Not specified", "On-site", "Hybrid", "Remote"])
+                manual_source = st.text_input("Source", value="Manual / official careers page")
+            manual_description = st.text_area(
+                "Job description / requirements",
+                height=150,
+                placeholder="Paste the job description. Do not include passwords or private account data."
+            )
+            submitted_job = st.form_submit_button("Save job to pipeline")
+        if submitted_job:
+            if not manual_title.strip() or not manual_company.strip():
+                st.warning("Enter at least a job title and company.")
+            else:
+                try:
+                    add_job({
+                        "title": manual_title, "company": manual_company,
+                        "location": manual_location, "url": manual_url,
+                        "work_mode": "" if manual_mode == "Not specified" else manual_mode,
+                        "source": manual_source, "description": manual_description,
+                    })
+                    st.success("Job saved. Duplicate URLs are automatically refreshed.")
+                except Exception as exc:
+                    st.error(f"Could not save job: {exc}")
+
+        jobs_for_review = list_jobs()
+        st.markdown("### Match and prepare")
+        if not jobs_for_review:
+            st.info("No saved jobs yet. Import Job Search results or add a role above.")
+        else:
+            profile_for_match = get_profile() or saved_profile
+            scored = []
+            for job_row in jobs_for_review:
+                payload = job_row.get("payload", {})
+                fit = score_job(payload, profile_for_match)
+                scored.append({
+                    "Fit": fit["score"],
+                    "Role": job_row["title"],
+                    "Company": job_row["company"],
+                    "Location": job_row["location"],
+                    "Skills matched": ", ".join(fit["matched_skills"]),
+                    "Skill gaps": ", ".join(fit["skill_gaps"]),
+                    "Job ID": job_row["job_id"],
+                })
+            scored.sort(key=lambda item: item["Fit"], reverse=True)
+            display_rows = [{k: v for k, v in row.items() if k != "Job ID"} for row in scored]
+            st.dataframe(pd.DataFrame(display_rows), use_container_width=True, hide_index=True)
+            st.caption("Fit score is a transparent keyword/location heuristic, not an ATS score or probability of selection.")
+
+            for row in scored[:20]:
+                job_row = next(j for j in jobs_for_review if j["job_id"] == row["Job ID"])
+                payload = job_row.get("payload", {})
+                fit = score_job(payload, profile_for_match)
+                with st.expander(f"{fit['score']}/100 · {job_row['title']} — {job_row['company']}"):
+                    st.write(job_row["location"] or "Location not specified")
+                    if job_row.get("url"):
+                        st.markdown(f"[Open original job posting]({job_row['url']})")
+                    st.write("**Match reasons**")
+                    for reason in fit["reasons"]:
+                        st.write(f"- {reason}")
+                    if fit["matched_skills"]:
+                        st.write("**Matched skills:** " + ", ".join(fit["matched_skills"]))
+                    if fit["skill_gaps"]:
+                        st.write("**Potential gaps:** " + ", ".join(fit["skill_gaps"]))
+                    st.caption(fit["note"])
+                    if st.button("Prepare application pack", key=f"career_prepare_{job_row['job_id']}"):
+                        profile_text = json.dumps(profile_for_match, ensure_ascii=False, indent=2)
+                        job_text = json.dumps(payload, ensure_ascii=False, indent=2)[:9000]
+                        packet = call_llm(
+                            [
+                                {
+                                    "role": "system",
+                                    "content": (
+                                        "You are a careful career application preparation agent. "
+                                        "Use only facts present in the candidate profile. Never invent employers, "
+                                        "degrees, dates, metrics, certifications, skills or achievements. "
+                                        "Mark missing facts as [CANDIDATE TO VERIFY]. Do not claim an application "
+                                        "was submitted. Produce a concise Markdown application preparation pack."
+                                    ),
+                                },
+                                {
+                                    "role": "user",
+                                    "content": (
+                                        f"CANDIDATE PROFILE (source of truth):\n{profile_text}\n\n"
+                                        f"JOB POSTING:\n{job_text}\n\n"
+                                        "Prepare: (1) fit summary and evidence, (2) explicit gaps, "
+                                        "(3) tailored professional summary, (4) truthful project/experience bullets, "
+                                        "(5) ATS keyword suggestions with no keyword stuffing, "
+                                        "(6) short cover-letter draft, (7) five interview topics, "
+                                        "(8) candidate verification checklist."
+                                    ),
+                                },
+                            ],
+                            "Preparing a job-specific application pack...",
+                        )
+                        if packet:
+                            approval_id = create_approval(
+                                "application_packet",
+                                f"Application pack — {job_row['title']} at {job_row['company']}",
+                                {
+                                    "job_id": job_row["job_id"],
+                                    "job": payload,
+                                    "candidate_profile": profile_for_match,
+                                    "draft": packet,
+                                    "external_action": "not_executed",
+                                },
+                                company=job_row["company"],
+                                role=job_row["title"],
+                            )
+                            st.success(f"Draft saved to Approval Queue (reference: {approval_id[:8]}). Nothing was submitted.")
+                            st.markdown(packet)
+                            st.download_button(
+                                "Download preparation pack",
+                                data=packet,
+                                file_name=f"application_pack_{job_row['company'].replace(' ', '_')}.md",
+                                mime="text/markdown",
+                                key=f"career_pack_dl_{job_row['job_id']}",
+                            )
+
+    with sub_network:
+        st.markdown("### Happenstance network research")
+        hs = connection_status()
+        st.markdown(
+            "Happenstance helps search your connected professional network and discover warm introduction paths. "
+            "It complements job discovery; it is not a job board or application submitter."
+        )
+        st.markdown("[Open Happenstance](https://happenstance.ai/) · [Official ChatGPT connection guide](https://developer.happenstance.ai/mcp/chatgpt)")
+        st.code(hs["mcp_url"], language="text")
+        st.warning(
+            "Connection status: not authenticated inside this standalone Streamlit app. "
+            "The official Happenstance ChatGPT integration uses its own Connect/sign-in flow. "
+            "Do not paste API keys, passwords, private mailbox exports or contact dumps here."
+        )
+        profile_net = get_profile() or saved_profile
+        target_roles_net = profile_net.get("target_roles", ["AI Engineer"])
+        target_locations_net = profile_net.get("target_locations", ["Bengaluru", "Hyderabad"])
+        suggested_prompt = referral_search_prompt(
+            ", ".join(target_roles_net[:3]),
+            ", ".join(target_roles_net[:3]),
+            ", ".join(target_locations_net),
+        )
+        st.markdown("**Suggested Happenstance search prompt**")
+        st.text_area("Copy this into Happenstance", value=suggested_prompt, height=120, key="hs_prompt_display")
+        st.markdown("**Paste relevant, non-sensitive search findings here**")
+        network_findings = st.text_area(
+            "Happenstance findings",
+            height=160,
+            placeholder="Paste names, roles, company and warm-introduction path. Omit private details that are not needed."
+        )
+        if st.button("Draft referral / recruiter message", key="career_referral_draft"):
+            if not network_findings.strip():
+                st.warning("Paste the relevant Happenstance findings first.")
+            else:
+                profile_text = json.dumps(profile_net, ensure_ascii=False, indent=2)
+                message_draft = call_llm(
+                    [
+                        {
+                            "role": "system",
+                            "content": (
+                                "Write a concise, respectful professional networking message. "
+                                "Do not invent prior relationships, referrals, shared history, or recipient details. "
+                                "Do not imply that the recipient has agreed to refer the candidate."
+                            ),
+                        },
+                        {
+                            "role": "user",
+                            "content": (
+                                f"Candidate profile:\n{profile_text}\n\n"
+                                f"Network search findings:\n{network_findings[:6000]}\n\n"
+                                "Draft a short message asking for advice or a referral only where the "
+                                "relationship path supports that request. Include a subject line when appropriate."
+                            ),
+                        },
+                    ],
+                    "Drafting a networking message...",
+                )
+                if message_draft:
+                    review_id = create_approval(
+                        "network_message",
+                        "Review networking / referral message",
+                        {
+                            "network_findings": network_findings[:6000],
+                            "draft": message_draft,
+                            "external_action": "not_executed",
+                        },
+                    )
+                    st.success(f"Message draft added to Approval Queue ({review_id[:8]}). It has not been sent.")
+                    st.markdown(message_draft)
+
+        st.markdown("---")
+        st.markdown("**Connect Happenstance to ChatGPT**")
+        st.write(
+            "The vendor documents an official ChatGPT integration: open the official Happenstance app, "
+            "select Connect, and sign in. Once connected in ChatGPT, run the suggested network prompt there "
+            "and paste the relevant findings into this tab."
+        )
+
+    with sub_review:
+        st.markdown("### Human approval queue")
+        st.info(
+            "Approve/reject records your decision and preserves an audit trail. "
+            "It does not send an email, LinkedIn message, or job application. "
+            "This release has no external-action executor connected."
+        )
+        approval_rows = list_approvals()
+        if not approval_rows:
+            st.info("No drafts awaiting review.")
+        for item in approval_rows:
+            status_label = item["status"].upper()
+            with st.expander(f"{status_label} · {item['title']} · {item['approval_id'][:8]}"):
+                st.caption(
+                    f"Type: {item['action_type']} · Company: {item['company'] or '—'} · "
+                    f"Role: {item['role'] or '—'} · Created: {item['created_at']}"
+                )
+                if not item["payload_integrity_ok"]:
+                    st.error("Payload integrity check failed. Do not approve this item.")
+                draft_text = item["payload"].get("draft", "")
+                if draft_text:
+                    st.markdown(draft_text)
+                    st.download_button(
+                        "Download draft",
+                        data=draft_text,
+                        file_name=f"review_{item['approval_id'][:8]}.md",
+                        mime="text/markdown",
+                        key=f"career_review_dl_{item['approval_id']}",
+                    )
+                else:
+                    st.json(item["payload"])
+                if item["status"] == "pending" and item["payload_integrity_ok"]:
+                    note = st.text_input(
+                        "Review note (optional)",
+                        key=f"career_note_{item['approval_id']}",
+                    )
+                    b1, b2 = st.columns(2)
+                    with b1:
+                        if st.button("Approve draft", key=f"career_approve_{item['approval_id']}"):
+                            if decide_approval(item["approval_id"], "approved", note):
+                                st.success("Approval recorded. No external action was executed.")
+                                st.rerun()
+                    with b2:
+                        if st.button("Reject draft", key=f"career_reject_{item['approval_id']}"):
+                            if decide_approval(item["approval_id"], "rejected", note):
+                                st.warning("Rejection recorded.")
+                                st.rerun()
+                elif item["status"] == "approved":
+                    st.success("Approved by you — execution is still not performed.")
+                elif item["status"] == "rejected":
+                    st.caption("Rejected. No external action was performed.")
+
+    with sub_profile:
+        st.markdown("### Candidate profile")
+        st.caption("Keep this factual and consistent with your resume. The agent must not invent qualifications.")
+        profile_form_data = get_profile() or saved_profile
+        with st.form("career_profile_form"):
+            profile_name = st.text_input("Name", value=profile_form_data.get("name", "Kalyan Kunduru"))
+            profile_education = st.text_area("Education", value=profile_form_data.get("education", ""), height=80)
+            profile_skills = st.text_area("Skills", value=profile_form_data.get("skills", ""), height=100)
+            profile_projects = st.text_area("Projects / experience evidence", value=profile_form_data.get("projects", profile_form_data.get("project", "")), height=120)
+            profile_experience = st.text_input("Experience summary", value=profile_form_data.get("experience", "Entry-level / fresher"))
+            profile_years = st.number_input(
+                "Full-time experience (years)", min_value=0.0, max_value=40.0,
+                value=float(profile_form_data.get("years_experience", 0)), step=0.5
+            )
+            roles_text = st.text_area(
+                "Target roles (one per line)",
+                value="\n".join(profile_form_data.get("target_roles", profile_defaults["target_roles"])),
+                height=120
+            )
+            locations_text = st.text_input(
+                "Target locations (comma-separated)",
+                value=", ".join(profile_form_data.get("target_locations", ["Bengaluru", "Hyderabad"]))
+            )
+            salary_min = st.number_input("Minimum target salary (LPA)", min_value=0, max_value=100, value=int(profile_form_data.get("salary_min_lpa", 4)))
+            salary_max = st.number_input("Maximum target salary (LPA)", min_value=0, max_value=100, value=int(profile_form_data.get("salary_max_lpa", 8)))
+            save_profile_clicked = st.form_submit_button("Save candidate profile")
+        if save_profile_clicked:
+            updated_profile = {
+                "name": profile_name.strip(),
+                "education": profile_education.strip(),
+                "skills": profile_skills.strip(),
+                "projects": profile_projects.strip(),
+                "experience": profile_experience.strip(),
+                "years_experience": profile_years,
+                "target_roles": [x.strip() for x in roles_text.splitlines() if x.strip()],
+                "target_locations": [x.strip() for x in locations_text.split(",") if x.strip()],
+                "salary_min_lpa": salary_min,
+                "salary_max_lpa": salary_max,
+            }
+            if salary_max and salary_min and salary_max < salary_min:
+                st.error("Maximum salary must be greater than or equal to minimum salary.")
+            else:
+                save_profile(updated_profile)
+                st.success("Candidate profile saved to the career database.")
+                st.rerun()
+
+        st.markdown("---")
+        st.markdown("**Audit trail**")
+        audit = list_audit_events(30)
+        if audit:
+            audit_frame = pd.DataFrame([
+                {
+                    "Time (UTC)": event["created_at"],
+                    "Entity": event["entity_type"],
+                    "Event": event["event_type"],
+                    "ID": event["entity_id"][:8],
+                }
+                for event in audit
+            ])
+            st.dataframe(audit_frame, use_container_width=True, hide_index=True)
+        else:
+            st.caption("No audit events yet.")
