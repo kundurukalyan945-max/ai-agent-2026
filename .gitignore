@@ -37,3 +37,8 @@ ai-suit-web/ai_suit_web
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Persistent career agent data (never commit candidate profile or application drafts)
+*.sqlite3
+*.sqlite3-*
+*.db
