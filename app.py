@@ -858,18 +858,28 @@ with tab6:
         unsafe_allow_html=True,
     )
 
+    legacy_profile = st.session_state.profile
     profile_defaults = {
-        "name": st.session_state.profile.get("name", "Kalyan Kunduru"),
-        "education": st.session_state.profile.get(
-            "education", "B.Tech CSE (AI & ML), Sri Venkateswara College of Engineering, Bengaluru (2026); CGPA 7.3"
+        "name": (
+            "Kalyan Kunduru" if legacy_profile.get("name") in (None, "", "Your Name")
+            else legacy_profile.get("name")
         ),
-        "skills": st.session_state.profile.get(
-            "skills", "Python, SQL, Java, Machine Learning, Deep Learning, YOLOv8, LangChain, Groq API, Streamlit, Pandas, NumPy"
+        "education": (
+            "B.Tech CSE (AI & ML), Sri Venkateswara College of Engineering, Bengaluru (2026); CGPA 7.3"
+            if legacy_profile.get("education", "").startswith("Degree, University")
+            else legacy_profile.get("education", "")
         ),
-        "projects": st.session_state.profile.get(
-            "project", "AI Career Suite (multi-agent career toolkit, Streamlit and web deployment); YOLOv8 object detection with offline text-to-speech pipeline"
+        "skills": (
+            "Python, SQL, Java, Machine Learning, Deep Learning, YOLOv8, LangChain, Groq API, Streamlit, Pandas, NumPy"
+            if legacy_profile.get("skills", "").startswith("List your skills")
+            else legacy_profile.get("skills", "")
         ),
-        "experience": "Entry-level / fresher; internships and project experience as listed in my verified resume",
+        "projects": (
+            "AI Career Suite (career toolkit, Streamlit and web deployment); YOLOv8 object detection with offline text-to-speech pipeline"
+            if legacy_profile.get("project", "").startswith("Your key project")
+            else legacy_profile.get("project", "")
+        ),
+        "experience": "Entry-level / fresher; project experience described in this profile",
         "years_experience": 0,
         "target_roles": [
             "AI Engineer", "Python Developer", "Generative AI Engineer",
