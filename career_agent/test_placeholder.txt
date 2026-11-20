@@ -1,1 +1,0 @@
-This file intentionally keeps package path visible to GitHub tree listing.
