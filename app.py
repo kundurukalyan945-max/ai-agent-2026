@@ -1084,7 +1084,7 @@ with tab6:
         target_roles_net = profile_net.get("target_roles", ["AI Engineer"])
         target_locations_net = profile_net.get("target_locations", ["Bengaluru", "Hyderabad"])
         suggested_prompt = referral_search_prompt(
-            ", ".join(target_roles_net[:3]),
+            "companies hiring entry-level AI and software candidates",
             ", ".join(target_roles_net[:3]),
             ", ".join(target_locations_net),
         )
