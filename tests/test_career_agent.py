@@ -51,6 +51,7 @@ class CareerAgentTests(unittest.TestCase):
         self.assertLessEqual(result["score"], 100)
         self.assertIn("docker", result["skill_gaps"])
         self.assertIn("python", result["matched_skills"])
+        self.assertEqual(result["role_alignment"], 100)
 
 
 if __name__ == "__main__":
