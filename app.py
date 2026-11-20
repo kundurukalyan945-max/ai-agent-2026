@@ -870,21 +870,22 @@ with tab6:
             else legacy_profile.get("education", "")
         ),
         "skills": (
-            "Python, SQL, Java, Machine Learning, Deep Learning, YOLOv8, LangChain, Groq API, Streamlit, Pandas, NumPy"
+            "Python, SQL, Pandas, NumPy, Matplotlib, scikit-learn, TensorFlow, YOLOv8, OpenCV, Streamlit, Jupyter Notebook, Git, GitHub, REST APIs, Vercel, LangChain, RAG, LLaMA 3.3, Groq API, prompt engineering"
             if legacy_profile.get("skills", "").startswith("List your skills")
             else legacy_profile.get("skills", "")
         ),
         "projects": (
-            "AI Career Suite (career toolkit, Streamlit and web deployment); YOLOv8 object detection with offline text-to-speech pipeline"
+            "AI Career Suite: five-agent application with job scraping, resume tailoring, interview coaching, PDF reading and orchestration; YOLOv8 object detection with OpenCV, Streamlit and offline text-to-speech; reported 93–95% project-test accuracy and sub-200 ms inference; presented at ACMETECH-2K26 (March 2026)."
             if legacy_profile.get("project", "").startswith("Your key project")
             else legacy_profile.get("project", "")
         ),
-        "experience": "Entry-level / fresher; project experience described in this profile",
+        "experience": "Entry-level candidate; AI & Machine Learning Intern — SmartBridge / APSCHE / Google for Developers (Oct 2025–Mar 2026, 240-hour programme); JPMorgan Chase & Co. and Deloitte virtual job simulations via Forage.",
         "years_experience": 0,
         "target_roles": [
-            "AI Engineer", "Python Developer", "Generative AI Engineer",
-            "Junior Data Scientist", "Machine Learning Engineer",
-            "LLM Engineer", "AI Application Developer", "Python Backend Developer"
+            "AI/ML Engineer", "AI Engineer", "Generative AI Engineer", "Python Developer",
+            "Junior Data Scientist", "ML Analyst", "Data Analyst", "Analytics Associate",
+            "Reporting Analyst", "Machine Learning Engineer", "LLM Engineer",
+            "AI Application Developer", "Python Backend Developer"
         ],
         "target_locations": ["Bengaluru", "Hyderabad"],
         "salary_min_lpa": 4,
