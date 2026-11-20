@@ -32,6 +32,12 @@ SKILL_ALIASES = {
     "azure": ("azure",),
     "kubernetes": ("kubernetes", "k8s"),
     "pytest": ("pytest",),
+    "opencv": ("opencv",),
+    "matplotlib": ("matplotlib",),
+    "computer vision": ("computer vision",),
+    "jupyter notebook": ("jupyter notebook", "jupyter"),
+    "prompt engineering": ("prompt engineering",),
+    "kafka": ("kafka",),
 }
 
 def _text(value: Any) -> str:
