@@ -922,6 +922,32 @@ with tab6:
 
     with sub_jobs:
         st.markdown("### Add jobs to your pipeline")
+        radar_csv = st.file_uploader(
+            "Import a CSV exported from your job tracker / Daily Job Radar",
+            type=["csv"],
+            key="career_radar_csv",
+            help="Expected columns include title, company, location and job_url/url; description and date_posted are optional."
+        )
+        if radar_csv is not None:
+            if st.button("Import uploaded job CSV", key="career_import_csv"):
+                try:
+                    radar_frame = pd.read_csv(radar_csv).fillna("")
+                    imported_csv = 0
+                    for _, csv_row in radar_frame.iterrows():
+                        row_dict = csv_row.to_dict()
+                        add_job({
+                            "title": row_dict.get("title") or row_dict.get("job_title", ""),
+                            "company": row_dict.get("company") or row_dict.get("employer", ""),
+                            "location": row_dict.get("location", ""),
+                            "url": row_dict.get("job_url") or row_dict.get("url", ""),
+                            "description": row_dict.get("description") or row_dict.get("job_description", ""),
+                            "date_posted": row_dict.get("date_posted", ""),
+                            "source": row_dict.get("source") or "Imported CSV",
+                        })
+                        imported_csv += 1
+                    st.success(f"Imported/refreshed {imported_csv} CSV rows. URL duplicates are deduplicated.")
+                except Exception as exc:
+                    st.error(f"CSV import failed: {exc}")
         current_results = st.session_state.get("job_results")
         if current_results is not None and hasattr(current_results, "empty") and not current_results.empty:
             if st.button("Import current Job Search results", key="career_import_job_results"):
