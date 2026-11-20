@@ -17,7 +17,7 @@
 
 ---
 
-> **tl;dr** — 5 AI agents in one app that actually help you land a job. Career coach, resume tailor, interview prep, job scraper, and a 3-step company research workflow. Runs on Groq's free API. No paid subscriptions, no fluff.
+> **tl;dr** — AI Career Suite combines career coaching, resume tailoring, interview practice, job search and company research with a persistent Career Agent workspace for job tracking, fit scoring, application-pack drafts, referral preparation and human-reviewed approvals.
 
 ---
 
@@ -29,9 +29,10 @@
 | 📄 **Resume Tailor** | ATS go brrr | Paste a JD → get rewritten bullets, ATS keywords, tailored summary → download `.txt` |
 | 🎤 **Interview Prep** | No more blanking in interviews | AI/ML question bank, scored answers, track improvement within session |
 | 🔍 **Job Scraper** | Python backend only | Live scraping via JobSpy → CSV export. Web app shows sample data |
-| 🤖 **Company Research** | 3-agent sequential workflow | Researcher → Resume Writer → Interview Coach, one pipeline, one click |
+| 🤖 **Company Research** | 3-step sequential workflow | Researcher → Resume Writer → Interview Coach, one pipeline, one click |
+| 🧭 **Career Agent** | Persistent career workspace | Candidate profile, saved jobs, transparent fit scoring, preparation packs, referral drafts, approval queue and audit trail |
 
-> **⚠️ Keeping it real:** No persistent memory (session only). No autonomous agents (sequential API calls, not CrewAI). No live jobs in the web app (use the Python version for that).
+> **⚠️ Keeping it real:** The original five tabs mostly use session state; the new Career Agent tab persists its profile, jobs and review records in SQLite. Company Research remains a sequential LLM workflow, not a fully autonomous multi-agent runtime. The review queue records approval but this release does not submit applications or send messages. The web frontend does not scrape live jobs.
 
 ---
 
@@ -45,6 +46,30 @@ No install needed → **[ai-suit-web.vercel.app](https://ai-suit-web.vercel.app)
 4. Start cooking 🔥
 
 ---
+
+
+## 🧭 Career Agent workspace
+
+The **Career Agent** tab adds a persistent job-search workspace alongside the original tools.
+
+- Store and edit your candidate profile, target roles, cities and salary range.
+- Import job results from the existing Job Search tab or a CSV from your Daily Job Radar.
+- Deduplicate jobs by URL and calculate an explainable keyword/location fit indicator.
+- Generate a truthful job-specific preparation pack: tailored summary, project bullets, keyword suggestions, cover-letter draft, interview topics and verification checklist.
+- Prepare referral/recruiter messages from Happenstance findings.
+- Review, approve or reject every draft. Decisions are hashed and recorded in an audit trail.
+
+### Happenstance
+
+Happenstance is an optional network-research source, not the job scraper. Connect it through its official ChatGPT integration using the vendor's [connection guide](https://developer.happenstance.ai/mcp/chatgpt). The Streamlit app does not claim to be authenticated to Happenstance; copy relevant findings from your connected Happenstance session into the Network & Referrals tab before drafting a message.
+
+### Approval and execution boundary
+
+Approval is recorded in the local database only. It does **not** submit a job application, send an email, or message a recruiter. A separate executor, account connection and per-action confirmation are required before external actions can be enabled. No automatic external action is performed by this release.
+
+### Persistent storage
+
+SQLite is used by default at career_agent.sqlite3 in the project root. Set CAREER_DB_PATH to a durable mounted path for hosted deployment. Streamlit-hosted local files may not survive a rebuild or restart; use a persistent volume or migrate to PostgreSQL/Supabase for durable cloud storage.
 
 ## 🛠️ Run it locally (full Python version)
 
