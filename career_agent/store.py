@@ -132,7 +132,7 @@ def _initialize(conn: Any) -> None:
 
 @contextmanager
 def _connect():
-    dsn = os.getenv("CAREER_DATABASE_URL", "").strip()
+    dsn = database_url()
     conn: Any
     if dsn.startswith(("postgres://", "postgresql://")):
         conn = _PostgresCompat(dsn)
