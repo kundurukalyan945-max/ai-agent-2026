@@ -236,8 +236,8 @@ class TestGetGroqClient:
 # ===========================================================================
 
 class TestModelConfig:
-    def test_default_model_is_llama(self):
-        assert "llama" in app.MODEL_ID.lower() or "llama" in os.getenv("GROQ_MODEL", "llama").lower()
+    def test_default_model_is_supported_gpt_oss(self):
+        assert app.MODEL_ID == "openai/gpt-oss-120b" or os.getenv("GROQ_MODEL")
 
     def test_model_id_is_nonempty(self):
         assert app.MODEL_ID.strip() != ""
