@@ -11,6 +11,7 @@ class CareerAgentTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         os.environ["CAREER_DB_PATH"] = str(Path(self.tmp.name) / "career.sqlite3")
+        os.environ.pop("CAREER_DATABASE_URL", None)
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -52,6 +53,15 @@ class CareerAgentTests(unittest.TestCase):
         self.assertIn("docker", result["skill_gaps"])
         self.assertIn("python", result["matched_skills"])
         self.assertEqual(result["role_alignment"], 100)
+
+
+    def test_profile_round_trip(self):
+        store.save_profile({"name": "Kalyan", "target_locations": ["Bengaluru", "Hyderabad"]})
+        self.assertEqual(store.get_profile()["name"], "Kalyan")
+
+    def test_database_backend_defaults_to_sqlite(self):
+        os.environ.pop("CAREER_DATABASE_URL", None)
+        self.assertTrue(store.database_backend().startswith("SQLite"))
 
 
 if __name__ == "__main__":
