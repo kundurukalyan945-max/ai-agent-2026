@@ -16,18 +16,24 @@ class CareerAgentTests(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
         os.environ.pop("CAREER_DB_PATH", None)
+        os.environ.pop("CAREER_DATABASE_URL", None)
 
     def test_job_dedupes_by_url(self):
-        job = {"title": "Python Developer", "company": "Acme",
-               "location": "Hyderabad", "url": "https://example.com/jobs/1"}
+        job = {
+            "title": "Python Developer",
+            "company": "Acme",
+            "location": "Hyderabad",
+            "url": "https://example.com/jobs/1",
+        }
         first = store.add_job(job)
         second = store.add_job({**job, "title": "Python Engineer"})
         self.assertEqual(first, second)
         self.assertEqual(len(store.list_jobs()), 1)
 
     def test_approval_requires_pending_and_records_decision(self):
-        item = store.create_approval("application_packet", "Acme role",
-                                     {"resume": "draft"})
+        item = store.create_approval(
+            "application_packet", "Acme role", {"resume": "draft"}
+        )
         self.assertTrue(store.decide_approval(item, "approved", "Reviewed"))
         self.assertFalse(store.decide_approval(item, "rejected"))
         record = store.list_approvals()[0]
@@ -42,11 +48,17 @@ class CareerAgentTests(unittest.TestCase):
 
     def test_matching_is_reproducible_and_exposes_gaps(self):
         result = score_job(
-            {"title": "Junior Python Developer", "location": "Hyderabad",
-             "description": "Python, SQL, Docker, FastAPI"},
-            {"skills": "Python, SQL, FastAPI",
-             "target_roles": ["Junior Python Developer"],
-             "target_locations": ["Hyderabad"], "years_experience": 0},
+            {
+                "title": "Junior Python Developer",
+                "location": "Hyderabad",
+                "description": "Python, SQL, Docker, FastAPI",
+            },
+            {
+                "skills": "Python, SQL, FastAPI",
+                "target_roles": ["Junior Python Developer"],
+                "target_locations": ["Hyderabad"],
+                "years_experience": 0,
+            },
         )
         self.assertGreaterEqual(result["score"], 0)
         self.assertLessEqual(result["score"], 100)
@@ -54,9 +66,10 @@ class CareerAgentTests(unittest.TestCase):
         self.assertIn("python", result["matched_skills"])
         self.assertEqual(result["role_alignment"], 100)
 
-
     def test_profile_round_trip(self):
-        store.save_profile({"name": "Kalyan", "target_locations": ["Bengaluru", "Hyderabad"]})
+        store.save_profile(
+            {"name": "Kalyan", "target_locations": ["Bengaluru", "Hyderabad"]}
+        )
         self.assertEqual(store.get_profile()["name"], "Kalyan")
 
     def test_database_backend_defaults_to_sqlite(self):
@@ -66,13 +79,3 @@ class CareerAgentTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-
-    def test_profile_round_trip(self):
-        store.save_profile({"name": "Kalyan", "target_locations": ["Bengaluru", "Hyderabad"]})
-        self.assertEqual(store.get_profile()["name"], "Kalyan")
-
-    def test_database_backend_defaults_to_sqlite(self):
-        os.environ.pop("CAREER_DATABASE_URL", None)
-        self.assertTrue(store.database_backend().startswith("SQLite"))
-
