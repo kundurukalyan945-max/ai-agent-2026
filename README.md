@@ -8,7 +8,7 @@
 [![Streamlit](https://img.shields.io/badge/🐍%20Streamlit%20App-Live-FF4B4B?style=for-the-badge)](https://ai-agent-2026-cttqmjzrumpwju6psuzkqv.streamlit.app)
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
-![Groq](https://img.shields.io/badge/LLM-LLaMA%203.3%2070B-F55036?style=flat-square)
+![Groq](https://img.shields.io/badge/LLM-GPT%20OSS%20120B-F55036?style=flat-square)
 ![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?style=flat-square&logo=vercel)
 ![License](https://img.shields.io/badge/License-MIT-2ECC8A?style=flat-square)
 ![Tests](https://img.shields.io/badge/Tests-43%20passing-2ECC8A?style=flat-square)
@@ -91,7 +91,7 @@ cp .env.example .env
 streamlit run app.py
 ```
 
-Get a **free** Groq key at [console.groq.com](https://console.groq.com) — LLaMA 3.3 70B is fast and free on their tier.
+Get a Groq API key at [console.groq.com](https://console.groq.com) — GPT OSS 120B is fast and free on their tier.
 
 ### Web version (zero setup)
 
@@ -118,7 +118,7 @@ pytest tests/ -v
 | Variable | Required | Default | Notes |
 |---|---|---|---|
 | `GROQ_API_KEY` | ✅ Yes | — | Free at [console.groq.com](https://console.groq.com) |
-| `GROQ_MODEL` | ❌ No | `llama-3.3-70b-versatile` | Swap to any Groq-supported model |
+| `GROQ_MODEL` | ❌ No | `openai/gpt-oss-120b` | Swap to any Groq-supported model |
 
 ---
 
@@ -127,7 +127,7 @@ pytest tests/ -v
 ```
 Backend      →  Python 3.12 · Streamlit · Groq SDK · JobSpy · pandas · pypdf · python-docx
 Frontend     →  Vanilla HTML/CSS/JS (zero frameworks) · PDF.js · glassmorphism UI
-LLM          →  Groq API · LLaMA 3.3 70B Versatile (free tier)
+LLM          →  Groq API · GPT OSS 120B Versatile (free tier)
 Deployment   →  Vercel (web) · Streamlit Cloud (Python)
 ```
 
