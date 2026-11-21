@@ -325,7 +325,7 @@ async function groq(messages, systemPrompt, maxTokens = 2400) {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: "Bearer " + key },
     body: JSON.stringify({
-      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+      model: process.env.GROQ_MODEL || "openai/gpt-oss-120b",
       messages: [{ role: "system", content: systemPrompt }, ...messages],
       temperature: 0.35,
       max_tokens: maxTokens
@@ -569,7 +569,7 @@ async function handleAction(req, res, body) {
       jsonResponse(res, 400, { error: "Invalid Happenstance search ID." });
       return;
     }
-    const result = await happenstanceRequest("/search/" + encodeURIComponent(searchId) + "/find-more", "POST", {});
+    const result = await happenstanceRequest("/search/" + encodeURIComponent(searchId) + "/find-more", "POST");
     jsonResponse(res, 200, { page: result });
   } else if (action === "happenstance.intro") {
     jsonResponse(res, 200, await draftIntro(db, body.person || {}));
