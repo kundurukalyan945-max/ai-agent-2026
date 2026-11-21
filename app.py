@@ -1,6 +1,6 @@
 """
 AI Career Suite — Streamlit application
-Model: llama-3.3-70b-versatile via Groq
+Model: openai/gpt-oss-120b via Groq
 Config: GROQ_API_KEY environment variable (or .env file)
 """
 import streamlit as st
@@ -39,7 +39,7 @@ def get_setting(name: str, default: str = "") -> str:
         return default
 
 
-MODEL_ID = get_setting("GROQ_MODEL", "llama-3.3-70b-versatile")
+MODEL_ID = get_setting("GROQ_MODEL", "openai/gpt-oss-120b")
 MAX_INPUT_CHARS = 8_000     # truncate large inputs before sending
 MAX_PDF_CHARS = 4_000       # truncate extracted PDF text
 API_TIMEOUT = 30            # seconds
@@ -909,7 +909,7 @@ with tab5:
                         else legacy_profile.get("education", "")
                     ),
                     "skills": (
-                        "Python, SQL, Pandas, NumPy, Matplotlib, scikit-learn, TensorFlow, YOLOv8, OpenCV, Streamlit, Jupyter Notebook, Git, GitHub, REST APIs, Vercel, LangChain, RAG, LLaMA 3.3, Groq API, prompt engineering"
+                        "Python, SQL, Pandas, NumPy, Matplotlib, scikit-learn, TensorFlow, YOLOv8, OpenCV, Streamlit, Jupyter Notebook, Git, GitHub, REST APIs, Vercel, LangChain, RAG, LLM APIs, Groq, prompt engineering"
                         if legacy_profile.get("skills", "").startswith("List your skills")
                         else legacy_profile.get("skills", "")
                     ),
