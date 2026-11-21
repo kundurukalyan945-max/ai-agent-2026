@@ -39,7 +39,7 @@ def _import_helpers():
         "chat_message", "error", "warning", "success", "info",
         "caption", "download_button", "button", "selectbox",
         "file_uploader", "rerun", "stop", "write", "empty",
-        "dataframe", "line_chart", "progress", "column_config",
+        "dataframe", "line_chart", "progress", "column_config", "metric", "code", "json",
     ]:
         setattr(stub, attr, lambda *a, **kw: None)
 
@@ -47,7 +47,7 @@ def _import_helpers():
     # is not overwritten with None when app.py does p["name"] = st.text_input(...)
     def _widget(*a, value=None, **kw):
         return value
-    for attr in ["text_input", "text_area"]:
+    for attr in ["text_input", "text_area", "number_input"]:
         setattr(stub, attr, _widget)
 
     # session_state needs to act like a dict-with-attribute-access
@@ -78,6 +78,14 @@ def _import_helpers():
         return _CM()
 
     stub.spinner = _cm_factory
+    stub.form = _cm_factory
+    stub.form_submit_button = lambda *a, **kw: False
+
+    def _choice_widget(*a, index=0, **kw):
+        options = a[1] if len(a) > 1 else kw.get("options", [])
+        return options[index] if options and 0 <= index < len(options) else None
+    stub.radio = _choice_widget
+    stub.selectbox = _choice_widget
     stub.sidebar = _CM()
     stub.expander = _cm_factory
     def _columns_factory(spec, **kw):
@@ -228,8 +236,8 @@ class TestGetGroqClient:
 # ===========================================================================
 
 class TestModelConfig:
-    def test_default_model_is_llama(self):
-        assert "llama" in app.MODEL_ID.lower() or "llama" in os.getenv("GROQ_MODEL", "llama").lower()
+    def test_default_model_is_supported_gpt_oss(self):
+        assert app.MODEL_ID == "openai/gpt-oss-120b" or os.getenv("GROQ_MODEL")
 
     def test_model_id_is_nonempty(self):
         assert app.MODEL_ID.strip() != ""

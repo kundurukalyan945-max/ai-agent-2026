@@ -8,16 +8,16 @@
 [![Streamlit](https://img.shields.io/badge/🐍%20Streamlit%20App-Live-FF4B4B?style=for-the-badge)](https://ai-agent-2026-cttqmjzrumpwju6psuzkqv.streamlit.app)
 
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)
-![Groq](https://img.shields.io/badge/LLM-LLaMA%203.3%2070B-F55036?style=flat-square)
+![Groq](https://img.shields.io/badge/LLM-GPT%20OSS%20120B-F55036?style=flat-square)
 ![Vercel](https://img.shields.io/badge/Deployed-Vercel-000000?style=flat-square&logo=vercel)
 ![License](https://img.shields.io/badge/License-MIT-2ECC8A?style=flat-square)
-![Tests](https://img.shields.io/badge/Tests-39%20passing-2ECC8A?style=flat-square)
+![Tests](https://img.shields.io/badge/Tests-43%20passing-2ECC8A?style=flat-square)
 
 </div>
 
 ---
 
-> **tl;dr** — 5 AI agents in one app that actually help you land a job. Career coach, resume tailor, interview prep, job scraper, and a 3-step company research workflow. Runs on Groq's free API. No paid subscriptions, no fluff.
+> **tl;dr** — AI Career Suite combines career coaching, resume tailoring, interview practice, job search and company research with a persistent Career Agent workspace for job tracking, fit scoring, application-pack drafts, referral preparation and human-reviewed approvals.
 
 ---
 
@@ -29,9 +29,10 @@
 | 📄 **Resume Tailor** | ATS go brrr | Paste a JD → get rewritten bullets, ATS keywords, tailored summary → download `.txt` |
 | 🎤 **Interview Prep** | No more blanking in interviews | AI/ML question bank, scored answers, track improvement within session |
 | 🔍 **Job Scraper** | Python backend only | Live scraping via JobSpy → CSV export. Web app shows sample data |
-| 🤖 **Company Research** | 3-agent sequential workflow | Researcher → Resume Writer → Interview Coach, one pipeline, one click |
+| 🤖 **Company Research** | 3-step sequential workflow | Researcher → Resume Writer → Interview Coach, one pipeline, one click |
+| 🧭 **Career Agent** | Persistent career workspace | Candidate profile, saved jobs, transparent fit scoring, preparation packs, referral drafts, approval queue and audit trail |
 
-> **⚠️ Keeping it real:** No persistent memory (session only). No autonomous agents (sequential API calls, not CrewAI). No live jobs in the web app (use the Python version for that).
+> **⚠️ Keeping it real:** The original five tabs mostly use session state; the new Career Agent tab persists its profile, jobs and review records in SQLite. Company Research remains a sequential LLM workflow, not a fully autonomous multi-agent runtime. The review queue records approval but this release does not submit applications or send messages. The web frontend does not scrape live jobs.
 
 ---
 
@@ -45,6 +46,30 @@ No install needed → **[ai-suit-web.vercel.app](https://ai-suit-web.vercel.app)
 4. Start cooking 🔥
 
 ---
+
+
+## 🧭 Career Agent workspace
+
+The **Career Agent** tab adds a persistent job-search workspace alongside the original tools.
+
+- Store and edit your candidate profile, target roles, cities and salary range.
+- Import job results from the existing Job Search tab or a CSV from your Daily Job Radar.
+- Deduplicate jobs by URL and calculate an explainable keyword/location fit indicator.
+- Generate a truthful job-specific preparation pack: tailored summary, project bullets, keyword suggestions, cover-letter draft, interview topics and verification checklist.
+- Prepare referral/recruiter messages from Happenstance findings.
+- Review, approve or reject every draft. Decisions are hashed and recorded in an audit trail.
+
+### Happenstance
+
+Happenstance is an optional network-research source, not the job scraper. Connect it through its official ChatGPT integration using the vendor's [connection guide](https://developer.happenstance.ai/mcp/chatgpt). The Streamlit app can call the Happenstance REST API directly when HAPPENSTANCE_API_KEY is configured in Streamlit Secrets. Search creation costs 2 credits; the UI requires an explicit credit confirmation, then polls the search status. Results stay in the current app session. The app does not send messages.
+
+### Hosted configuration\n\nAdd these keys in Streamlit Community Cloud → App → Settings → Secrets (or as server environment variables):\n\n- `CAREER_DATABASE_URL`: PostgreSQL connection string from Supabase Dashboard → Connect.\n- `HAPPENSTANCE_API_KEY`: API key from Happenstance developer settings. A search costs 2 credits.\n- `GROQ_API_KEY`: existing Groq LLM key.\n\nUse deployment secrets, not `.env` or committed configuration, in hosted environments.\n\n### Private workspace access\n\nThe Career Agent tab is locked unless `APP_ACCESS_PASSWORD` is configured in Streamlit Secrets. Set a strong, unique passphrase in Streamlit Community Cloud → App settings → Secrets. This is a single-user gate, not a multi-account identity system; do not reuse an important account password.\n\n### Approval and execution boundary
+
+Approval is recorded in the local database only. It does **not** submit a job application, send an email, or message a recruiter. A separate executor, account connection and per-action confirmation are required before external actions can be enabled. No automatic external action is performed by this release.
+
+### Persistent storage
+
+SQLite is used by default at career_agent.sqlite3 in the project root. Set CAREER_DATABASE_URL to a PostgreSQL/Supabase connection string stored in Streamlit Secrets. Local SQLite is for development only; generated files and app-local files on Streamlit Community Cloud are not guaranteed to persist across user sessions. For IPv4-only Community Cloud networking, copy the Supabase Session Pooler connection string from Dashboard → Connect. Keep the password out of GitHub.
 
 ## 🛠️ Run it locally (full Python version)
 
@@ -66,7 +91,7 @@ cp .env.example .env
 streamlit run app.py
 ```
 
-Get a **free** Groq key at [console.groq.com](https://console.groq.com) — LLaMA 3.3 70B is fast and free on their tier.
+Get a Groq API key at [console.groq.com](https://console.groq.com) — GPT OSS 120B is fast and free on their tier.
 
 ### Web version (zero setup)
 
@@ -84,7 +109,7 @@ pip install pytest
 pytest tests/ -v
 ```
 
-**39 tests. 0 real API calls.** Covers XSS escaping, key masking, missing-key handling, error classification, model config, docx generation, and profile defaults. Streamlit is stubbed so tests run anywhere.
+**43 tests. 0 real API calls.** Covers XSS escaping, key masking, missing-key handling, error classification, model config, docx generation, and profile defaults. Streamlit is stubbed so tests run anywhere.
 
 ---
 
@@ -93,7 +118,7 @@ pytest tests/ -v
 | Variable | Required | Default | Notes |
 |---|---|---|---|
 | `GROQ_API_KEY` | ✅ Yes | — | Free at [console.groq.com](https://console.groq.com) |
-| `GROQ_MODEL` | ❌ No | `llama-3.3-70b-versatile` | Swap to any Groq-supported model |
+| `GROQ_MODEL` | ❌ No | `openai/gpt-oss-120b` | Swap to any Groq-supported model |
 
 ---
 
@@ -102,7 +127,7 @@ pytest tests/ -v
 ```
 Backend      →  Python 3.12 · Streamlit · Groq SDK · JobSpy · pandas · pypdf · python-docx
 Frontend     →  Vanilla HTML/CSS/JS (zero frameworks) · PDF.js · glassmorphism UI
-LLM          →  Groq API · LLaMA 3.3 70B Versatile (free tier)
+LLM          →  Groq API · GPT OSS 120B (usage-priced; check current rates)
 Deployment   →  Vercel (web) · Streamlit Cloud (Python)
 ```
 
