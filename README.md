@@ -127,7 +127,7 @@ pytest tests/ -v
 ```
 Backend      →  Python 3.12 · Streamlit · Groq SDK · JobSpy · pandas · pypdf · python-docx
 Frontend     →  Vanilla HTML/CSS/JS (zero frameworks) · PDF.js · glassmorphism UI
-LLM          →  Groq API · GPT OSS 120B Versatile (free tier)
+LLM          →  Groq API · GPT OSS 120B (usage-priced; check current rates)
 Deployment   →  Vercel (web) · Streamlit Cloud (Python)
 ```
 
