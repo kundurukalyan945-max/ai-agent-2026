@@ -28,3 +28,25 @@ jobs:
         run: python -m py_compile app.py career_agent/*.py
       - name: Run unit tests
         run: pytest -q
+
+  web-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check Vercel API syntax
+        run: node --check ai-suit-web/api/career-agent.js
+      - name: Extract and check browser JavaScript
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          html = Path("ai-suit-web/index.html").read_text(encoding="utf-8")
+          match = re.search(r"<script>(.*?)</script>", html, flags=re.S)
+          if not match:
+              raise SystemExit("Inline application script was not found")
+          Path("/tmp/ai-suit-web.js").write_text(match.group(1), encoding="utf-8")
+          PY
+          node --check /tmp/ai-suit-web.js
