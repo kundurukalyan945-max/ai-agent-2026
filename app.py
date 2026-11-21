@@ -14,10 +14,13 @@ import pandas as pd
 
 from career_agent import (
     add_job, create_approval, decide_approval, get_profile, list_approvals,
-    list_audit_events, list_jobs, save_profile,
+    list_audit_events, list_jobs, save_profile, database_backend,
 )
 from career_agent.matching import score_job
-from career_agent.happenstance import connection_status, referral_search_prompt
+from career_agent.happenstance import (
+    HappenstanceError, connection_status, create_network_search,
+    flatten_search_results, get_network_search, get_usage, referral_search_prompt,
+)
 
 load_dotenv()
 
