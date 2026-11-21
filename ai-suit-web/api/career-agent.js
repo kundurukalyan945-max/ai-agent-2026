@@ -515,7 +515,15 @@ async function handleAction(req, res, body) {
     const ok = await updateJobStatus(db, safeString(body.job_id, 80), safeString(body.status, 40));
     jsonResponse(res, ok ? 200 : 404, { ok });
   } else if (action === "packet.generate") {
-    jsonResponse(res, 200, await generatePacket(db, safeString(body.job_id, 80)));
+    const packet = await generatePacket(db, safeString(body.job_id, 80));
+    const approvalId = await createApproval(db, {
+      action_type: "application_pack_review",
+      title: "Application preparation pack — " + packet.job.title,
+      company: packet.job.company,
+      role: packet.job.title,
+      payload: { job: packet.job, fit: packet.fit, draft: packet.draft, execution: "not_performed" }
+    });
+    jsonResponse(res, 200, { ...packet, approval_id: approvalId });
   } else if (action === "approvals.create") {
     const id = await createApproval(db, body);
     jsonResponse(res, 200, { approval_id: id });
@@ -551,8 +559,18 @@ async function handleAction(req, res, body) {
       jsonResponse(res, 400, { error: "Invalid Happenstance search ID." });
       return;
     }
-    const result = await happenstanceRequest("/search/" + encodeURIComponent(searchId));
+    const pageId = safeString(body.page_id, 120);
+    const query = pageId ? "?page_id=" + encodeURIComponent(pageId) : "";
+    const result = await happenstanceRequest("/search/" + encodeURIComponent(searchId) + query);
     jsonResponse(res, 200, { search: result, people: flattenPeople(result) });
+  } else if (action === "happenstance.findMore") {
+    const searchId = safeString(body.search_id, 120);
+    if (!/^[a-zA-Z0-9_-]+$/.test(searchId)) {
+      jsonResponse(res, 400, { error: "Invalid Happenstance search ID." });
+      return;
+    }
+    const result = await happenstanceRequest("/search/" + encodeURIComponent(searchId) + "/find-more", "POST", {});
+    jsonResponse(res, 200, { page: result });
   } else if (action === "happenstance.intro") {
     jsonResponse(res, 200, await draftIntro(db, body.person || {}));
   } else {
@@ -576,3 +594,5 @@ module.exports = async function handler(req, res) {
     });
   }
 };
+
+module.exports.config = { maxDuration: 60 };
