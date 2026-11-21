@@ -56,3 +56,13 @@ class CareerAgentTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+    def test_profile_round_trip(self):
+        store.save_profile({"name": "Kalyan", "target_locations": ["Bengaluru", "Hyderabad"]})
+        self.assertEqual(store.get_profile()["name"], "Kalyan")
+
+    def test_database_backend_defaults_to_sqlite(self):
+        os.environ.pop("CAREER_DATABASE_URL", None)
+        self.assertTrue(store.database_backend().startswith("SQLite"))
+
