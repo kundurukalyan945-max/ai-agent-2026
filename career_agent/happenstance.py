@@ -76,6 +76,8 @@ def _request(method: str, path: str, *, payload: dict[str, Any] | None = None,
     if not response.ok:
         try:
             error = response.json()
+            if not isinstance(error, dict):
+                error = {}
         except ValueError:
             error = {}
         status = response.status_code
