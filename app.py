@@ -1135,19 +1135,17 @@ with tab6:
                                 key=f"career_pack_dl_{job_row['job_id']}",
                             )
 
+
     with sub_network:
         st.markdown("### Happenstance network research")
         hs = connection_status()
         st.markdown(
-            "Happenstance helps search your connected professional network and discover warm introduction paths. "
-            "It complements job discovery; it is not a job board or application submitter."
+            "Search your connected professional network for recruiters, hiring managers, engineers and warm introduction paths. "
+            "Happenstance is a people/network search service, not a job board."
         )
-        st.markdown("[Open Happenstance](https://happenstance.ai/) · [Official ChatGPT connection guide](https://developer.happenstance.ai/mcp/chatgpt)")
-        st.code(hs["mcp_url"], language="text")
-        st.warning(
-            "Connection status: not authenticated inside this standalone Streamlit app. "
-            "The official Happenstance ChatGPT integration uses its own Connect/sign-in flow. "
-            "Do not paste API keys, passwords, private mailbox exports or contact dumps here."
+        st.markdown(
+            "[Happenstance](https://happenstance.ai/) · "
+            "[Official API documentation](https://developer.happenstance.ai/api-reference/introduction)"
         )
         profile_net = get_profile() or saved_profile
         target_roles_net = profile_net.get("target_roles", ["AI Engineer"])
@@ -1157,60 +1155,164 @@ with tab6:
             ", ".join(target_roles_net[:3]),
             ", ".join(target_locations_net),
         )
-        st.markdown("**Suggested Happenstance search prompt**")
-        st.text_area("Copy this into Happenstance", value=suggested_prompt, height=120, key="hs_prompt_display")
-        st.markdown("**Paste relevant, non-sensitive search findings here**")
-        network_findings = st.text_area(
-            "Happenstance findings",
-            height=160,
-            placeholder="Paste names, roles, company and warm-introduction path. Omit private details that are not needed."
-        )
-        if st.button("Draft referral / recruiter message", key="career_referral_draft"):
-            if not network_findings.strip():
-                st.warning("Paste the relevant Happenstance findings first.")
-            else:
-                profile_text = json.dumps(profile_net, ensure_ascii=False, indent=2)
-                message_draft = call_llm(
-                    [
-                        {
-                            "role": "system",
-                            "content": (
-                                "Write a concise, respectful professional networking message. "
-                                "Do not invent prior relationships, referrals, shared history, or recipient details. "
-                                "Do not imply that the recipient has agreed to refer the candidate."
-                            ),
-                        },
-                        {
-                            "role": "user",
-                            "content": (
-                                f"Candidate profile:\n{profile_text}\n\n"
-                                f"Network search findings:\n{network_findings[:6000]}\n\n"
-                                "Draft a short message asking for advice or a referral only where the "
-                                "relationship path supports that request. Include a subject line when appropriate."
-                            ),
-                        },
-                    ],
-                    "Drafting a networking message...",
-                )
-                if message_draft:
-                    review_id = create_approval(
-                        "network_message",
-                        "Review networking / referral message",
-                        {
-                            "network_findings": network_findings[:6000],
-                            "draft": message_draft,
-                            "external_action": "not_executed",
-                        },
-                    )
-                    st.success(f"Message draft added to Approval Queue ({review_id[:8]}). It has not been sent.")
-                    st.markdown(message_draft)
 
-        st.markdown("---")
-        st.markdown("**Connect Happenstance to ChatGPT**")
-        st.write(
-            "The vendor documents an official ChatGPT integration: open the official Happenstance app, "
-            "select Connect, and sign in. Once connected in ChatGPT, run the suggested network prompt there "
-            "and paste the relevant findings into this tab."
+        if hs["api_ready"]:
+            st.success("Happenstance API key detected in secure app configuration.")
+            try:
+                usage = get_usage()
+                balance = usage.get("balance_credits")
+                if balance is not None:
+                    st.metric("Happenstance credit balance", balance)
+            except HappenstanceError as exc:
+                st.warning(str(exc))
+
+            st.caption(
+                "Starting a new Happenstance search costs 2 credits. Checking status/results does not create another search."
+            )
+            search_query = st.text_area(
+                "Network search query",
+                value=suggested_prompt,
+                height=120,
+                key="hs_api_query",
+            )
+            hc1, hc2 = st.columns(2)
+            with hc1:
+                include_my_connections = st.checkbox(
+                    "Search my direct connections", value=True, key="hs_my_connections"
+                )
+            with hc2:
+                include_friends_connections = st.checkbox(
+                    "Also search friends' connections", value=False, key="hs_friend_connections"
+                )
+            confirm_cost = st.checkbox(
+                "I understand this search consumes 2 Happenstance credits.",
+                value=False,
+                key="hs_cost_confirm",
+            )
+            if st.button(
+                "Start Happenstance search (2 credits)",
+                key="hs_start_search",
+                disabled=(not confirm_cost or not search_query.strip()),
+            ):
+                try:
+                    created = create_network_search(
+                        search_query,
+                        include_my_connections=include_my_connections,
+                        include_friends_connections=include_friends_connections,
+                    )
+                    st.session_state["hs_active_search_id"] = created["id"]
+                    st.session_state["hs_active_search_url"] = created["url"]
+                    st.session_state["hs_active_search_status"] = "RUNNING"
+                    st.session_state["hs_people_results"] = []
+                    st.success("Search created. Results may take time to finish.")
+                except (HappenstanceError, ValueError) as exc:
+                    st.error(str(exc))
+
+            active_id = st.session_state.get("hs_active_search_id")
+            active_url = st.session_state.get("hs_active_search_url")
+            if active_id:
+                if active_url:
+                    st.markdown("[Open this search in Happenstance](" + str(active_url) + ")")
+                status_now = st.session_state.get("hs_active_search_status", "RUNNING")
+                st.caption("Active search: " + str(active_id) + " · Status: " + str(status_now))
+                if st.button("Refresh search status and results", key="hs_refresh_search"):
+                    try:
+                        search_data = get_network_search(active_id)
+                        status_now = str(search_data.get("status", "UNKNOWN")).upper()
+                        st.session_state["hs_active_search_status"] = status_now
+                        if status_now == "COMPLETED":
+                            st.session_state["hs_people_results"] = flatten_search_results(search_data)
+                            st.success(
+                                "Search completed. "
+                                + str(len(st.session_state["hs_people_results"]))
+                                + " people returned."
+                            )
+                        elif status_now == "FAILED":
+                            st.error("Happenstance reports that this search failed. Review the query before starting another.")
+                        else:
+                            st.info("Search is still " + status_now + ". Refresh again shortly.")
+                    except HappenstanceError as exc:
+                        st.error(str(exc))
+
+                people = st.session_state.get("hs_people_results", [])
+                if people:
+                    people_df = pd.DataFrame(people)
+                    display_cols = [
+                        col for col in
+                        ["name", "title", "company", "relevance_score", "mutuals", "linkedin_url", "happenstance_url"]
+                        if col in people_df.columns
+                    ]
+                    st.dataframe(people_df[display_cols], use_container_width=True, hide_index=True)
+                    labels = [
+                        str(person["name"]) + " — " + str(person.get("title") or "Role not listed")
+                        + " @ " + str(person.get("company") or "Company not listed")
+                        for person in people
+                    ]
+                    label_to_person = dict(zip(labels, people))
+                    selected = st.multiselect(
+                        "Select people for whom to prepare messages",
+                        options=labels,
+                        key="hs_selected_people",
+                    )
+                    if selected and st.button("Prepare message for selected people", key="hs_make_message"):
+                        selected_people = [label_to_person[label] for label in selected]
+                        profile_text = json.dumps(profile_net, ensure_ascii=False, indent=2)
+                        findings_text = json.dumps(selected_people, ensure_ascii=False, indent=2)
+                        draft = call_llm(
+                            [
+                                {
+                                    "role": "system",
+                                    "content": (
+                                        "Write concise, respectful professional networking messages. "
+                                        "Use only supplied person details and the candidate profile. Never invent a prior "
+                                        "relationship, shared history, current vacancy or promised referral. "
+                                        "Prepare one message per selected person and mark uncertain facts for verification."
+                                    ),
+                                },
+                                {
+                                    "role": "user",
+                                    "content": (
+                                        "Candidate profile:\n" + profile_text
+                                        + "\n\nSelected Happenstance results:\n" + findings_text
+                                        + "\n\nWrite a short message asking for relevant career advice or referral guidance. "
+                                        "Only mention a mutual connection when the search result lists one."
+                                    ),
+                                },
+                            ],
+                            "Preparing messages for selected network connections...",
+                        )
+                        if draft:
+                            review_id = create_approval(
+                                "network_message",
+                                "Review Happenstance networking messages",
+                                {
+                                    "selected_people": selected_people,
+                                    "draft": draft,
+                                    "external_action": "not_executed",
+                                },
+                            )
+                            st.success(
+                                "Draft added to Approval Queue (" + review_id[:8] + "). No message has been sent."
+                            )
+                            st.markdown(draft)
+        else:
+            st.warning(
+                "Direct Happenstance API search is not configured in this app. "
+                "Add HAPPENSTANCE_API_KEY through Streamlit app Settings → Secrets or the server environment. "
+                "Never paste the API key into a chat box or commit it to GitHub."
+            )
+            st.markdown("**Suggested prompt for Happenstance's website or ChatGPT connection**")
+            st.text_area(
+                "Copy this prompt into Happenstance",
+                value=suggested_prompt,
+                height=120,
+                key="hs_manual_prompt",
+            )
+            st.markdown("[Official ChatGPT integration guide](https://developer.happenstance.ai/mcp/chatgpt)")
+
+        st.caption(
+            "Search results stay in this app session. Selected people and the generated draft are stored in the "
+            "approval queue for review. This app does not send messages or contact anyone."
         )
 
     with sub_review:
