@@ -882,6 +882,9 @@ with tab5:
                     else:
                         st.error("Incorrect password.")
             if st.session_state.get("career_agent_authenticated", False):
+                if st.button("Lock private workspace", key="career_agent_lock"):
+                    st.session_state["career_agent_authenticated"] = False
+                    st.rerun()
                 st.markdown(
                     '<div class="panel-head">'
                     f'<span class="panel-tag">CAREER OS</span>'
