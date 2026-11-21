@@ -61,15 +61,15 @@ The **Career Agent** tab adds a persistent job-search workspace alongside the or
 
 ### Happenstance
 
-Happenstance is an optional network-research source, not the job scraper. Connect it through its official ChatGPT integration using the vendor's [connection guide](https://developer.happenstance.ai/mcp/chatgpt). The Streamlit app does not claim to be authenticated to Happenstance; copy relevant findings from your connected Happenstance session into the Network & Referrals tab before drafting a message.
+Happenstance is an optional network-research source, not the job scraper. Connect it through its official ChatGPT integration using the vendor's [connection guide](https://developer.happenstance.ai/mcp/chatgpt). The Streamlit app can call the Happenstance REST API directly when HAPPENSTANCE_API_KEY is configured in Streamlit Secrets. Search creation costs 2 credits; the UI requires an explicit credit confirmation, then polls the search status. Results stay in the current app session. The app does not send messages.
 
-### Approval and execution boundary
+### Hosted configuration\n\nAdd these keys in Streamlit Community Cloud → App → Settings → Secrets (or as server environment variables):\n\n- `CAREER_DATABASE_URL`: PostgreSQL connection string from Supabase Dashboard → Connect.\n- `HAPPENSTANCE_API_KEY`: API key from Happenstance developer settings. A search costs 2 credits.\n- `GROQ_API_KEY`: existing Groq LLM key.\n\nUse deployment secrets, not `.env` or committed configuration, in hosted environments.\n\n### Approval and execution boundary
 
 Approval is recorded in the local database only. It does **not** submit a job application, send an email, or message a recruiter. A separate executor, account connection and per-action confirmation are required before external actions can be enabled. No automatic external action is performed by this release.
 
 ### Persistent storage
 
-SQLite is used by default at career_agent.sqlite3 in the project root. Set CAREER_DB_PATH to a durable mounted path for hosted deployment. Streamlit-hosted local files may not survive a rebuild or restart; use a persistent volume or migrate to PostgreSQL/Supabase for durable cloud storage.
+SQLite is used by default at career_agent.sqlite3 in the project root. Set CAREER_DATABASE_URL to a PostgreSQL/Supabase connection string stored in Streamlit Secrets. Local SQLite is for development only; generated files and app-local files on Streamlit Community Cloud are not guaranteed to persist across user sessions. For IPv4-only Community Cloud networking, copy the Supabase Session Pooler connection string from Dashboard → Connect. Keep the password out of GitHub.
 
 ## 🛠️ Run it locally (full Python version)
 
