@@ -392,7 +392,7 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(79,142,255,0.2
 
         <div class="stats-strip">
           <div class="stat-cell"><div class="stat-label">Mode</div><div class="stat-value accent">ATS Optimized</div></div>
-          <div class="stat-cell"><div class="stat-label">Model</div><div class="stat-value">LLaMA 3.3 70B</div></div>
+          <div class="stat-cell"><div class="stat-label">Model</div><div class="stat-value">GPT OSS 120B</div></div>
           <div class="stat-cell"><div class="stat-label">Output</div><div class="stat-value">.txt</div></div>
         </div>
 
@@ -941,8 +941,10 @@ async function careerAgentLoadProfile() {
     document.getElementById("ca-profile-education").value = p.education || "";
     document.getElementById("ca-profile-skills").value = p.skills || "";
     document.getElementById("ca-profile-project").value = p.project || p.projects || "";
-    document.getElementById("ca-profile-roles").value = (p.target_roles || p.targetRoles || [p.targetRole || "AI/ML Engineer, Python Developer, Data Analyst"]).join(", ");
-    document.getElementById("ca-profile-locations").value = (p.target_locations || p.targetLocations || [p.targetLocation || "Bengaluru, Hyderabad"]).join(", ");
+    const caRoleList = p.target_roles || p.targetRoles || p.targetRole || "AI/ML Engineer, Python Developer, Data Analyst";
+    const caLocationList = p.target_locations || p.targetLocations || p.targetLocation || "Bengaluru, Hyderabad";
+    document.getElementById("ca-profile-roles").value = Array.isArray(caRoleList) ? caRoleList.join(", ") : String(caRoleList);
+    document.getElementById("ca-profile-locations").value = Array.isArray(caLocationList) ? caLocationList.join(", ") : String(caLocationList);
     if (!Object.keys(data.profile || {}).length) await careerAgentSaveProfile(true);
   } catch (error) {
     caMessage("ca-profile-message", error.message, "error");
@@ -1330,7 +1332,7 @@ async function callGroq(messages, systemPrompt) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages: [{ role: 'system', content: systemPrompt }, ...messages],
       temperature: 0.7,
       max_tokens: 1500
