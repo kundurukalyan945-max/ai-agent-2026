@@ -99,6 +99,12 @@ def _request(method: str, path: str, *, payload: dict[str, Any] | None = None,
     return data
 
 
+
+def get_usage() -> dict[str, Any]:
+    """Return Happenstance credit balance. This is a read-only endpoint."""
+    return _request("GET", "/usage")
+
+
 def create_network_search(text: str, *, include_my_connections: bool = True,
                           include_friends_connections: bool = False,
                           group_ids: list[str] | None = None) -> dict[str, Any]:
@@ -136,11 +142,11 @@ def referral_search_prompt(company: str, role: str, city: str) -> str:
     )
 
 
-def flatten_search_results(data: dict[str, Any]) -> list[dict[str, str]]:
+def flatten_search_results(data: dict[str, Any]) -> list[dict[str, str | float]]:
     """Create a compact, UI-safe representation without storing raw personal profiles."""
     mutuals = data.get("mutuals") or []
     people = data.get("results") or []
-    rows: list[dict[str, str]] = []
+    rows: list[dict[str, str | float]] = []
     for person in people:
         if not isinstance(person, dict):
             continue
@@ -161,5 +167,6 @@ def flatten_search_results(data: dict[str, Any]) -> list[dict[str, str]]:
             "linkedin_url": str(social.get("linkedin_url") or ""),
             "happenstance_url": str(social.get("happenstance_url") or ""),
             "mutuals": ", ".join(mutual_names),
+            "relevance_score": float(person.get("weighted_traits_score") or 0),
         })
     return rows
