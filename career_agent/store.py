@@ -27,9 +27,24 @@ def database_path() -> Path:
     return Path(__file__).resolve().parents[1] / "career_agent.sqlite3"
 
 
+def _secret(name: str) -> str:
+    value = os.getenv(name, "").strip()
+    if value:
+        return value
+    try:
+        import streamlit as st
+        return str(st.secrets.get(name, "")).strip()
+    except Exception:
+        return ""
+
+
+def database_url() -> str:
+    return _secret("CAREER_DATABASE_URL")
+
+
 def database_backend() -> str:
     """Return a safe backend label without revealing a connection string."""
-    dsn = os.getenv("CAREER_DATABASE_URL", "").strip()
+    dsn = database_url()
     return "PostgreSQL (remote DSN configured)" if dsn.startswith(("postgres://", "postgresql://")) else "SQLite (local file)"
 
 
