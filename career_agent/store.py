@@ -1,7 +1,7 @@
-"""SQLite persistence for jobs, candidate profile, approvals and audit events.
+"""SQLite/PostgreSQL persistence for jobs, profile, approvals and audit events.
 
-The default database is local to the project. For hosted deployments, set
-CAREER_DB_PATH to a durable mounted path or replace this adapter with Postgres.
+Set CAREER_DATABASE_URL to a PostgreSQL/Supabase DSN for durable hosted storage.
+Otherwise a local SQLite file is used. Never commit database files or credentials.
 """
 from __future__ import annotations
 
@@ -27,34 +27,51 @@ def database_path() -> Path:
     return Path(__file__).resolve().parents[1] / "career_agent.sqlite3"
 
 
-@contextmanager
-def _connect():
-    path = database_path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(path, timeout=15)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    conn.execute("PRAGMA journal_mode = WAL")
-    _initialize(conn)
-    try:
-        yield conn
-        conn.commit()
-    except Exception:
-        conn.rollback()
-        raise
-    finally:
-        conn.close()
+def database_backend() -> str:
+    """Return a safe backend label without revealing a connection string."""
+    dsn = os.getenv("CAREER_DATABASE_URL", "").strip()
+    return "PostgreSQL (remote DSN configured)" if dsn.startswith(("postgres://", "postgresql://")) else "SQLite (local file)"
 
 
-def _initialize(conn: sqlite3.Connection) -> None:
-    conn.executescript(
-        """
-        CREATE TABLE IF NOT EXISTS candidate_profile (
+class _PostgresCompat:
+    """Small adapter so the repository layer can keep qmark placeholders."""
+    def __init__(self, dsn: str):
+        try:
+            import psycopg
+            from psycopg.rows import dict_row
+        except ImportError as exc:
+            raise RuntimeError(
+                "CAREER_DATABASE_URL is set but psycopg is missing. Install requirements.txt."
+            ) from exc
+        self._conn = psycopg.connect(
+            dsn,
+            row_factory=dict_row,
+            connect_timeout=10,
+            sslmode="require",
+            prepare_threshold=None,
+        )
+
+    def execute(self, statement: str, params: tuple | list = ()):
+        return self._conn.execute(statement.replace("?", "%s"), params)
+
+    def commit(self):
+        self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
+
+    def close(self):
+        self._conn.close()
+
+
+def _initialize(conn: Any) -> None:
+    statements = [
+        """CREATE TABLE IF NOT EXISTS candidate_profile (
             profile_key TEXT PRIMARY KEY,
             payload_json TEXT NOT NULL,
             updated_at TEXT NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS jobs (
+        )""",
+        """CREATE TABLE IF NOT EXISTS jobs (
             job_id TEXT PRIMARY KEY,
             dedupe_key TEXT NOT NULL UNIQUE,
             title TEXT NOT NULL,
@@ -68,8 +85,8 @@ def _initialize(conn: sqlite3.Connection) -> None:
             payload_json TEXT NOT NULL,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
-        );
-        CREATE TABLE IF NOT EXISTS approvals (
+        )""",
+        """CREATE TABLE IF NOT EXISTS approvals (
             approval_id TEXT PRIMARY KEY,
             action_type TEXT NOT NULL,
             title TEXT NOT NULL,
@@ -81,27 +98,52 @@ def _initialize(conn: sqlite3.Connection) -> None:
             reviewer_note TEXT NOT NULL DEFAULT '',
             created_at TEXT NOT NULL,
             decided_at TEXT NOT NULL DEFAULT ''
-        );
-        CREATE TABLE IF NOT EXISTS audit_events (
+        )""",
+        """CREATE TABLE IF NOT EXISTS audit_events (
             event_id TEXT PRIMARY KEY,
             entity_type TEXT NOT NULL,
             entity_id TEXT NOT NULL,
             event_type TEXT NOT NULL,
             detail_json TEXT NOT NULL,
             created_at TEXT NOT NULL
-        );
-        CREATE INDEX IF NOT EXISTS idx_jobs_updated ON jobs(updated_at DESC);
-        CREATE INDEX IF NOT EXISTS idx_approvals_status ON approvals(status, created_at DESC);
-        CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_events(created_at DESC);
-        """
-    )
+        )""",
+        "CREATE INDEX IF NOT EXISTS idx_jobs_updated ON jobs(updated_at DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_approvals_status ON approvals(status, created_at DESC)",
+        "CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_events(created_at DESC)",
+    ]
+    for statement in statements:
+        conn.execute(statement)
+
+
+@contextmanager
+def _connect():
+    dsn = os.getenv("CAREER_DATABASE_URL", "").strip()
+    conn: Any
+    if dsn.startswith(("postgres://", "postgresql://")):
+        conn = _PostgresCompat(dsn)
+    else:
+        path = database_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(path, timeout=15)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA journal_mode = WAL")
+    try:
+        _initialize(conn)
+        yield conn
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def _json(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, default=str)
 
 
-def _audit(conn: sqlite3.Connection, entity_type: str, entity_id: str,
+def _audit(conn: Any, entity_type: str, entity_id: str,
            event_type: str, detail: dict[str, Any] | None = None) -> None:
     conn.execute(
         "INSERT INTO audit_events VALUES (?, ?, ?, ?, ?, ?)",
@@ -127,9 +169,7 @@ def save_profile(profile: dict[str, Any]) -> None:
                  payload_json=excluded.payload_json, updated_at=excluded.updated_at""",
             (_json(clean), utc_now()),
         )
-        _audit(conn, "profile", "default", "profile_saved", {
-            "fields": sorted(clean.keys()),
-        })
+        _audit(conn, "profile", "default", "profile_saved", {"fields": sorted(clean.keys())})
 
 
 def _job_dedupe_key(job: dict[str, Any]) -> str:
@@ -231,7 +271,6 @@ def list_approvals(status: str | None = None, limit: int = 100) -> list[dict[str
     for row in rows:
         item = dict(row)
         item["payload"] = json.loads(item.pop("payload_json"))
-        # Recompute the digest so tampering can be detected before a future executor exists.
         item["payload_integrity_ok"] = (
             hashlib.sha256(_json(item["payload"]).encode("utf-8")).hexdigest()
             == item["payload_sha256"]
@@ -259,8 +298,7 @@ def decide_approval(approval_id: str, decision: str, reviewer_note: str = "") ->
             (decision, reviewer_note.strip(), utc_now(), approval_id),
         )
         _audit(conn, "approval", approval_id, decision, {
-            "payload_sha256": row["payload_sha256"],
-            "execution": "not_performed",
+            "payload_sha256": row["payload_sha256"], "execution": "not_performed",
         })
     return True
 
