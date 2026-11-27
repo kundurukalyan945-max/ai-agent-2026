@@ -224,6 +224,48 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(79,142,255,0.2
 /* ── Overlay (mobile sidebar) ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;backdrop-filter:blur(2px)}
 .overlay.show{display:block}
+
+/* ── Career Agent workspace ── */
+.agent-panel{background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;box-shadow:var(--glass-shadow)}
+.agent-panel-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.agent-muted{font-size:12px;line-height:1.5;color:var(--text3)}
+.agent-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.agent-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.agent-stat{border:1px solid var(--glass-border);background:rgba(8,16,50,.55);border-radius:var(--radius-sm);padding:12px}
+.agent-stat small{display:block;color:var(--text3);text-transform:uppercase;font:10px 'JetBrains Mono',monospace;letter-spacing:.7px}
+.agent-stat strong{display:block;font-size:21px;margin-top:5px;color:var(--text)}
+.agent-job{border:1px solid var(--glass-border);border-radius:var(--radius);background:rgba(8,16,50,.4);padding:16px;margin-top:10px}
+.agent-job-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.agent-job h3{font-size:14px;color:var(--text);margin-bottom:4px}
+.agent-job-meta{font-size:12px;color:var(--text2);line-height:1.5}
+.agent-score{font:700 14px 'JetBrains Mono',monospace;color:var(--green);white-space:nowrap}
+.agent-tags{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.agent-chip{font:10px 'JetBrains Mono',monospace;color:var(--accent2);border:1px solid rgba(79,142,255,.25);background:rgba(79,142,255,.08);border-radius:20px;padding:4px 8px}
+.agent-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.agent-actions select{max-width:165px;padding:8px 30px 8px 10px;font-size:12px}
+.agent-person{border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:14px;margin-top:10px;background:rgba(8,16,50,.4)}
+.agent-person h4{font-size:14px;margin-bottom:4px}
+.agent-person p{font-size:12px;color:var(--text2);line-height:1.5;margin-top:4px}
+.agent-approval{border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:14px;margin-top:10px}
+.agent-approval-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.agent-status{font:10px 'JetBrains Mono',monospace;padding:4px 7px;border-radius:6px;background:rgba(79,142,255,.1);color:var(--accent2);border:1px solid var(--border2)}
+.agent-status.pending{color:var(--yellow);border-color:rgba(255,177,60,.25);background:rgba(255,177,60,.08)}
+.agent-status.approved{color:var(--green);border-color:rgba(46,204,138,.25);background:rgba(46,204,138,.08)}
+.agent-status.rejected{color:var(--red);border-color:rgba(255,92,92,.25);background:rgba(255,92,92,.08)}
+.agent-output{white-space:pre-wrap;word-break:break-word;font-size:12.5px;line-height:1.6;color:var(--text);background:rgba(4,8,24,.6);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:14px;margin-top:10px;max-height:520px;overflow:auto}
+.agent-message{font-size:12px;line-height:1.5;color:var(--text2);margin-top:10px}
+.agent-message.error{color:var(--red)}
+.agent-message.ok{color:var(--green)}
+.agent-check{display:flex;gap:9px;align-items:flex-start;color:var(--text2);font-size:12px;line-height:1.5;margin:12px 0}
+.agent-check input{width:auto;margin-top:2px;accent-color:var(--accent)}
+.agent-field-note{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.5}
+.agent-divider{border:0;border-top:1px solid var(--glass-border);margin:16px 0}
+.agent-table-wrap{overflow:auto}
+.agent-audit{width:100%;border-collapse:collapse;font-size:11px}
+.agent-audit th,.agent-audit td{text-align:left;padding:9px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.agent-audit th{font:10px 'JetBrains Mono',monospace;color:var(--text3);text-transform:uppercase}
+@media(max-width:700px){.agent-grid{grid-template-columns:1fr}.agent-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.agent-job-top,.agent-approval-head{flex-direction:column;align-items:flex-start}}
+
 </style>
 </head>
 <body>
@@ -257,6 +299,10 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(79,142,255,0.2
       <button class="nav-item" onclick="goTo('crew',this)">
         <span class="nav-icon">🤖</span> Multi-Agent Crew
         <span class="nav-badge">3x</span>
+      </button>
+      <button class="nav-item" onclick="goTo('agent',this)">
+        <span class="nav-icon">🚀</span> Career Agent
+        <span class="nav-badge">NEW</span>
       </button>
       <div class="nav-label" style="margin-top:8px">Settings</div>
       <button class="nav-item" onclick="goTo('settings',this)">
@@ -346,7 +392,7 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(79,142,255,0.2
 
         <div class="stats-strip">
           <div class="stat-cell"><div class="stat-label">Mode</div><div class="stat-value accent">ATS Optimized</div></div>
-          <div class="stat-cell"><div class="stat-label">Model</div><div class="stat-value">LLaMA 3.3 70B</div></div>
+          <div class="stat-cell"><div class="stat-label">Model</div><div class="stat-value">GPT OSS 120B</div></div>
           <div class="stat-cell"><div class="stat-label">Output</div><div class="stat-value">.txt</div></div>
         </div>
 
@@ -546,6 +592,127 @@ select:focus{border-color:var(--accent);box-shadow:0 0 0 1px rgba(79,142,255,0.2
         </div>
       </div>
 
+      <!-- ══ PAGE: CAREER AGENT ══ -->
+      <div class="page" id="page-agent">
+        <div class="page-header">
+          <div class="page-eyebrow">◆ PRIVATE WORKSPACE · AGENT 06</div>
+          <div class="page-title">Career Agent</div>
+          <div class="page-desc">Your approval-first job search command centre. Find roles, score fit, prepare applications, and discover warm-network paths.</div>
+        </div>
+
+        <div id="career-agent-login" class="agent-panel">
+          <div class="card-header"><div class="card-tag">PRIVATE</div><div class="card-title">Unlock your Career Agent</div></div>
+          <p class="page-desc" style="margin:0 0 14px">Use the private password configured as <code>APP_ACCESS_PASSWORD</code> in your Vercel project environment variables. This is separate from Streamlit Secrets.</p>
+          <form onsubmit="event.preventDefault();careerAgentUnlock()">
+            <div class="agent-grid">
+              <div><label>Career Agent password</label><input type="password" id="career-agent-password" autocomplete="current-password" placeholder="Enter your private password"></div>
+              <div style="display:flex;align-items:flex-end"><button class="btn btn-primary" type="submit" id="career-agent-unlock-btn">Unlock workspace</button></div>
+            </div>
+          </form>
+          <div id="career-agent-login-message" class="agent-message"></div>
+        </div>
+
+        <div id="career-agent-workspace" style="display:none">
+          <div class="agent-actions" style="justify-content:space-between;margin:0 0 14px">
+            <div id="career-agent-health" class="agent-message">Checking connected services...</div>
+            <button class="btn btn-ghost btn-sm" onclick="careerAgentLogout()">Lock workspace</button>
+          </div>
+
+          <div class="agent-stats">
+            <div class="agent-stat"><small>Saved roles</small><strong id="ca-stat-jobs">0</strong></div>
+            <div class="agent-stat"><small>Shortlisted</small><strong id="ca-stat-shortlist">0</strong></div>
+            <div class="agent-stat"><small>Pending review</small><strong id="ca-stat-pending">0</strong></div>
+            <div class="agent-stat"><small>Marked applied</small><strong id="ca-stat-applied">0</strong></div>
+          </div>
+
+          <div class="agent-panel">
+            <div class="card-header"><div class="card-tag">PROFILE</div><div class="card-title">Candidate profile</div></div>
+            <p class="agent-muted" style="margin-bottom:12px">Saved to your Supabase database and used for job matching and preparation. Update these details before relying on fit scores.</p>
+            <div class="agent-grid">
+              <div><label>Name</label><input id="ca-profile-name" type="text" placeholder="Your name"></div>
+              <div><label>Education</label><input id="ca-profile-education" type="text" placeholder="Degree, college, graduation year"></div>
+              <div><label>Target roles (comma-separated)</label><input id="ca-profile-roles" type="text" placeholder="AI/ML Engineer, Python Developer, Data Analyst"></div>
+              <div><label>Target locations (comma-separated)</label><input id="ca-profile-locations" type="text" placeholder="Bengaluru, Hyderabad"></div>
+            </div>
+            <div style="margin-top:12px"><label>Skills</label><textarea id="ca-profile-skills" rows="3" placeholder="Python, SQL, Pandas, LangChain..."></textarea></div>
+            <div style="margin-top:12px"><label>Key projects and evidence</label><textarea id="ca-profile-project" rows="3" placeholder="Project names, technologies, verified results and links..."></textarea></div>
+            <div class="agent-actions"><button class="btn btn-primary btn-sm" onclick="careerAgentSaveProfile()">Save candidate profile</button><span id="ca-profile-message" class="agent-message"></span></div>
+          </div>
+
+          <div class="agent-panel">
+            <div class="card-header"><div class="card-tag">JOB PIPELINE</div><div class="card-title">Bring jobs into your workspace</div></div>
+            <p class="agent-muted">Import the CSV from Daily Fresher Job Radar, upload another job CSV, or save a verified listing manually. Duplicate URLs are consolidated.</p>
+            <div class="agent-grid" style="margin-top:14px">
+              <div>
+                <label>Import job CSV</label>
+                <input type="file" id="ca-job-csv" accept=".csv,text/csv">
+                <div class="agent-field-note">Expected headers include title, company, location, url, source, description and date_posted. Common apply-link variants are also supported.</div>
+                <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="careerAgentImportCsv()">Import CSV</button>
+              </div>
+              <div>
+                <label>Search Daily Fresher Job Radar</label>
+                <p class="agent-muted">Use the existing daily job report, then download its CSV and import it here. This app does not run the scheduled job search itself.</p>
+                <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="careerAgentExportCsv()">↓ Export saved jobs CSV</button>
+              </div>
+            </div>
+            <hr class="agent-divider">
+            <div class="card-title" style="margin-bottom:12px">Add a job manually</div>
+            <div class="agent-grid">
+              <div><label>Job title</label><input type="text" id="ca-job-title" placeholder="Junior Python Developer"></div>
+              <div><label>Company</label><input type="text" id="ca-job-company" placeholder="Company name"></div>
+              <div><label>Location</label><input type="text" id="ca-job-location" placeholder="Bengaluru or Hyderabad"></div>
+              <div><label>Official job URL</label><input type="text" id="ca-job-url" placeholder="https://company.com/careers/job"></div>
+            </div>
+            <div style="margin-top:12px"><label>Job description (optional)</label><textarea id="ca-job-description" rows="3" placeholder="Paste the job description for more useful matching and preparation..."></textarea></div>
+            <div class="agent-actions"><button class="btn btn-primary btn-sm" onclick="careerAgentAddJob()">Save job</button><span id="ca-job-message" class="agent-message"></span></div>
+          </div>
+
+          <div class="agent-panel">
+            <div class="card-header"><div class="card-tag">MATCHING</div><div class="card-title">Saved jobs and fit ranking</div></div>
+            <p class="agent-muted">Scores are transparent keyword and location heuristics, not hiring probabilities. Check every employer's official listing and eligibility.</p>
+            <div id="career-agent-jobs"><div class="agent-muted">Loading your saved jobs...</div></div>
+          </div>
+
+          <div class="agent-panel">
+            <div class="card-header"><div class="card-tag">HAPPENSTANCE</div><div class="card-title">Warm-network discovery</div></div>
+            <p class="agent-muted">Find relevant recruiters, hiring managers and engineers through connections you have available in Happenstance. A search costs 2 credits. This is a people-discovery tool, not a job-posting search.</p>
+            <div class="agent-actions">
+              <button class="btn btn-ghost btn-sm" onclick="careerAgentCheckCredits()">Check Happenstance credits</button>
+              <span id="ca-happenstance-credits" class="agent-message">Credits not checked</span>
+            </div>
+            <div style="margin-top:12px"><label>Company (optional)</label><input type="text" id="ca-network-company" placeholder="e.g. Target companies or leave blank for broader search"></div>
+            <div class="agent-grid" style="margin-top:12px">
+              <div><label>Role focus</label><input type="text" id="ca-network-role" value="entry-level AI, Python and data roles"></div>
+              <div><label>Location focus</label><input type="text" id="ca-network-location" value="Bengaluru and Hyderabad"></div>
+            </div>
+            <div style="margin-top:12px"><label>People-search query</label><textarea id="ca-network-query" rows="3" placeholder="Find recruiters and engineers at target companies..."></textarea></div>
+            <label class="agent-check"><input type="checkbox" id="ca-network-my-connections" checked><span>Search my connected network (upload your LinkedIn connections to Happenstance for this to return useful results).</span></label>
+            <label class="agent-check"><input type="checkbox" id="ca-network-friends"><span>Include friends' connections where available.</span></label>
+            <label class="agent-check"><input type="checkbox" id="ca-network-ack"><span>I understand that starting this new search costs 2 Happenstance API credits.</span></label>
+            <div class="agent-actions"><button class="btn btn-primary btn-sm" id="ca-network-search-btn" onclick="careerAgentSearchNetwork()">Search my network · 2 credits</button><span id="ca-network-message" class="agent-message"></span></div>
+            <div id="ca-network-results"></div>
+          </div>
+
+          <div class="agent-panel">
+            <div class="card-header"><div class="card-tag">HUMAN REVIEW</div><div class="card-title">Approval queue</div></div>
+            <p class="agent-muted">Generated application packs and networking drafts appear here for your review. Recording approval or rejection only records your decision; it does not submit an application or send a message.</p>
+            <div id="career-agent-approvals"><div class="agent-muted">Loading approval queue...</div></div>
+          </div>
+
+          <div class="agent-panel">
+            <div class="card-header"><div class="card-tag">AUDIT</div><div class="card-title">Activity history</div></div>
+            <div id="career-agent-audit"><div class="agent-muted">Loading audit history...</div></div>
+          </div>
+
+          <div id="career-agent-packet" class="agent-panel" style="display:none">
+            <div class="card-header"><div class="card-tag">PREPARATION PACK</div><div class="card-title">Generated draft</div></div>
+            <div id="ca-packet-meta" class="agent-muted"></div>
+            <pre id="ca-packet-text" class="agent-output"></pre>
+            <div class="agent-actions"><button class="btn btn-ghost btn-sm" onclick="careerAgentDownloadPacket()">↓ Download draft</button></div>
+          </div>
+        </div>
+      </div>
+
       <!-- ══ PAGE: SETTINGS ══ -->
       <div class="page" id="page-settings">
         <div class="page-header">
@@ -644,6 +811,490 @@ const state = {
   }))
 };
 
+// ── CAREER AGENT (Vercel server-side workspace) ──
+const careerAgent = {
+  authenticated: false, jobs: [], approvals: [], audit: [], profile: {},
+  searchId: "", searchPageId: "", searchPeople: [], lastPacket: ""
+};
+const CA_API = "/api/career-agent";
+
+async function careerAgentApi(payload) {
+  const response = await fetch(CA_API, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  let data = {};
+  try { data = await response.json(); } catch (_) {}
+  if (!response.ok) throw new Error(data.error || ("Request failed (" + response.status + ")"));
+  return data;
+}
+function caMessage(id, text, kind = "") {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = "agent-message" + (kind ? " " + kind : "");
+}
+function caSetBusy(id, busy, busyText, idleText) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.disabled = !!busy;
+  if (busyText || idleText) el.textContent = busy ? busyText : idleText;
+}
+function caSplit(value) {
+  return String(value || "").split(/[,;\n]/).map(v => v.trim()).filter(Boolean);
+}
+function caSafeUrl(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch (_) { return ""; }
+}
+function caAttr(value) {
+  return String(value || "").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+async function careerAgentEnter() {
+  const login = document.getElementById("career-agent-login");
+  const workspace = document.getElementById("career-agent-workspace");
+  login.style.display = "block";
+  workspace.style.display = "none";
+  try {
+    await careerAgentApi({ action: "session" });
+    careerAgent.authenticated = true;
+    await careerAgentLoadWorkspace();
+  } catch (error) {
+    careerAgent.authenticated = false;
+    caMessage("career-agent-login-message", error.message, error.message.includes("Unlock") ? "" : "error");
+  }
+}
+async function careerAgentUnlock() {
+  const passwordEl = document.getElementById("career-agent-password");
+  const password = passwordEl.value;
+  if (!password) { caMessage("career-agent-login-message", "Enter your Career Agent password.", "error"); return; }
+  caSetBusy("career-agent-unlock-btn", true, "Unlocking...", "Unlock workspace");
+  try {
+    await careerAgentApi({ action: "login", password });
+    passwordEl.value = "";
+    careerAgent.authenticated = true;
+    caMessage("career-agent-login-message", "", "");
+    await careerAgentLoadWorkspace();
+    showToast("✓ Career Agent unlocked");
+  } catch (error) {
+    caMessage("career-agent-login-message", error.message, "error");
+  } finally {
+    caSetBusy("career-agent-unlock-btn", false, "", "Unlock workspace");
+  }
+}
+async function careerAgentLogout() {
+  try { await careerAgentApi({ action: "logout" }); } catch (_) {}
+  careerAgent.authenticated = false;
+  document.getElementById("career-agent-workspace").style.display = "none";
+  document.getElementById("career-agent-login").style.display = "block";
+  document.getElementById("career-agent-password").value = "";
+  caMessage("career-agent-login-message", "Workspace locked.", "ok");
+}
+async function careerAgentLoadWorkspace() {
+  document.getElementById("career-agent-login").style.display = "none";
+  document.getElementById("career-agent-workspace").style.display = "block";
+  await Promise.all([
+    careerAgentLoadProfile(),
+    careerAgentLoadJobs(),
+    careerAgentLoadApprovals(),
+    careerAgentLoadAudit(),
+    careerAgentHealth()
+  ]);
+}
+async function careerAgentHealth() {
+  try {
+    const data = await careerAgentApi({ action: "health" });
+    const parts = [
+      "Database " + (data.database_configured ? "configured" : "missing"),
+      "Groq " + (data.groq_configured ? "configured" : "missing"),
+      "Happenstance " + (data.happenstance_configured ? "configured" : "not configured")
+    ];
+    const el = document.getElementById("career-agent-health");
+    el.textContent = parts.join(" · ");
+    el.className = "agent-message " + (data.database_configured && data.groq_configured ? "ok" : "error");
+  } catch (error) {
+    caMessage("career-agent-health", error.message, "error");
+  }
+}
+async function careerAgentLoadProfile() {
+  try {
+    const data = await careerAgentApi({ action: "profile.get" });
+    let p = data.profile || {};
+    if (!Object.keys(p).length) {
+      p = {
+        name: state.profile.name || "",
+        education: state.profile.education || "",
+        skills: state.profile.skills || "",
+        project: state.profile.project || "",
+        targetRole: state.profile.targetRole || "",
+        targetLocation: state.profile.targetLocation || "",
+        target_roles: caSplit(state.profile.targetRole || "AI/ML Engineer, Python Developer, Data Analyst"),
+        target_locations: caSplit(state.profile.targetLocation || "Bengaluru, Hyderabad")
+      };
+    }
+    careerAgent.profile = p;
+    document.getElementById("ca-profile-name").value = p.name || "";
+    document.getElementById("ca-profile-education").value = p.education || "";
+    document.getElementById("ca-profile-skills").value = p.skills || "";
+    document.getElementById("ca-profile-project").value = p.project || p.projects || "";
+    const caRoleList = p.target_roles || p.targetRoles || p.targetRole || "AI/ML Engineer, Python Developer, Data Analyst";
+    const caLocationList = p.target_locations || p.targetLocations || p.targetLocation || "Bengaluru, Hyderabad";
+    document.getElementById("ca-profile-roles").value = Array.isArray(caRoleList) ? caRoleList.join(", ") : String(caRoleList);
+    document.getElementById("ca-profile-locations").value = Array.isArray(caLocationList) ? caLocationList.join(", ") : String(caLocationList);
+    if (!Object.keys(data.profile || {}).length) await careerAgentSaveProfile(true);
+  } catch (error) {
+    caMessage("ca-profile-message", error.message, "error");
+  }
+}
+async function careerAgentSaveProfile(silent = false) {
+  const roles = caSplit(document.getElementById("ca-profile-roles").value);
+  const locations = caSplit(document.getElementById("ca-profile-locations").value);
+  const profile = {
+    name: document.getElementById("ca-profile-name").value.trim(),
+    education: document.getElementById("ca-profile-education").value.trim(),
+    skills: document.getElementById("ca-profile-skills").value.trim(),
+    project: document.getElementById("ca-profile-project").value.trim(),
+    targetRole: roles.join(", "),
+    targetLocation: locations.join(", "),
+    target_roles: roles,
+    target_locations: locations
+  };
+  try {
+    await careerAgentApi({ action: "profile.save", profile });
+    careerAgent.profile = profile;
+    if (!silent) caMessage("ca-profile-message", "Profile saved to persistent storage.", "ok");
+  } catch (error) {
+    caMessage("ca-profile-message", error.message, "error");
+  }
+}
+async function careerAgentLoadJobs() {
+  try {
+    const data = await careerAgentApi({ action: "jobs.list" });
+    careerAgent.jobs = data.jobs || [];
+    careerAgentRenderJobs();
+  } catch (error) {
+    document.getElementById("career-agent-jobs").textContent = error.message;
+  }
+}
+function careerAgentRenderJobs() {
+  const jobs = careerAgent.jobs || [];
+  const saved = jobs.length;
+  const shortlisted = jobs.filter(j => (j.status || "saved") === "shortlisted").length;
+  const applied = jobs.filter(j => (j.status || "saved") === "applied").length;
+  document.getElementById("ca-stat-jobs").textContent = saved;
+  document.getElementById("ca-stat-shortlist").textContent = shortlisted;
+  document.getElementById("ca-stat-applied").textContent = applied;
+  document.getElementById("ca-stat-pending").textContent = careerAgent.approvals.filter(a => a.status === "pending").length;
+  const root = document.getElementById("career-agent-jobs");
+  if (!jobs.length) {
+    root.innerHTML = '<div class="agent-muted" style="padding:18px 0">No saved jobs yet. Import your Daily Fresher Job Radar CSV or add a verified job above.</div>';
+    return;
+  }
+  const statuses = ["saved","shortlisted","preparing","applied","interview","rejected","archived"];
+  root.innerHTML = jobs.map(job => {
+    const score = job.fit && Number.isFinite(job.fit.score) ? job.fit.score : 0;
+    const link = caSafeUrl(job.url);
+    const matched = job.fit && job.fit.matched_skills ? job.fit.matched_skills : [];
+    const gaps = job.fit && job.fit.skill_gaps ? job.fit.skill_gaps : [];
+    return '<article class="agent-job">' +
+      '<div class="agent-job-top"><div><h3>' + escHtml(job.title) + '</h3><div class="agent-job-meta">' +
+      escHtml(job.company) + ' · ' + escHtml(job.location || "Location not listed") + ' · ' + escHtml(job.source || "manual") +
+      (job.date_posted ? ' · ' + escHtml(job.date_posted) : '') + '</div></div>' +
+      '<div class="agent-score">' + score + '/100 fit</div></div>' +
+      '<div class="agent-tags">' + matched.slice(0,8).map(x => '<span class="agent-chip">✓ ' + escHtml(x) + '</span>').join("") +
+      gaps.slice(0,5).map(x => '<span class="agent-chip" style="color:var(--yellow)">Gap: ' + escHtml(x) + '</span>').join("") + '</div>' +
+      '<div class="agent-muted">' + escHtml((job.fit && job.fit.note) || "Heuristic fit estimate; verify job requirements.") + '</div>' +
+      '<div class="agent-actions"><select aria-label="Job pipeline status" onchange="careerAgentSetStatus(' + "'" + caAttr(job.job_id) + "'" + ',this.value)">' +
+      statuses.map(s => '<option value="' + s + '"' + ((job.status || "saved") === s ? " selected" : "") + '>' + s.charAt(0).toUpperCase() + s.slice(1) + '</option>').join("") +
+      '</select><button class="btn btn-primary btn-sm" onclick="careerAgentGeneratePacket(' + "'" + caAttr(job.job_id) + "'" + ')">Prepare application pack</button>' +
+      (link ? '<a class="btn btn-ghost btn-sm" href="' + caAttr(link) + '" target="_blank" rel="noopener noreferrer">Official listing ↗</a>' : '') +
+      '</div></article>';
+  }).join("");
+}
+async function careerAgentSetStatus(jobId, status) {
+  try {
+    await careerAgentApi({ action: "jobs.status", job_id: jobId, status });
+    await careerAgentLoadJobs();
+  } catch (error) { showToast(error.message); }
+}
+async function careerAgentAddJob() {
+  const job = {
+    title: document.getElementById("ca-job-title").value.trim(),
+    company: document.getElementById("ca-job-company").value.trim(),
+    location: document.getElementById("ca-job-location").value.trim(),
+    url: document.getElementById("ca-job-url").value.trim(),
+    description: document.getElementById("ca-job-description").value.trim(),
+    source: "manual",
+    status: "saved"
+  };
+  if (!job.title || !job.company) { caMessage("ca-job-message", "Enter at least a job title and company.", "error"); return; }
+  try {
+    await careerAgentApi({ action: "jobs.add", job });
+    ["ca-job-title","ca-job-company","ca-job-location","ca-job-url","ca-job-description"].forEach(id => document.getElementById(id).value = "");
+    caMessage("ca-job-message", "Job saved. Duplicate listing URLs are consolidated.", "ok");
+    await careerAgentLoadJobs();
+  } catch (error) { caMessage("ca-job-message", error.message, "error"); }
+}
+function careerAgentParseCsv(text) {
+  const rows = []; let row = []; let field = ""; let quoted = false;
+  const source = String(text || "").replace(/^\uFEFF/, "");
+  for (let i = 0; i < source.length; i++) {
+    const c = source[i];
+    if (c === '"' && quoted && source[i+1] === '"') { field += '"'; i++; }
+    else if (c === '"') quoted = !quoted;
+    else if (c === ',' && !quoted) { row.push(field); field = ""; }
+    else if ((c === '\n' || c === '\r') && !quoted) {
+      if (c === '\r' && source[i+1] === '\n') i++;
+      row.push(field); field = "";
+      if (row.some(x => String(x).trim())) rows.push(row);
+      row = [];
+    } else field += c;
+  }
+  row.push(field);
+  if (row.some(x => String(x).trim())) rows.push(row);
+  if (rows.length < 2) return [];
+  const headers = rows.shift().map(x => String(x).trim().toLowerCase().replace(/[\s-]+/g,"_"));
+  const pick = (obj, names) => {
+    for (const name of names) if (obj[name] != null && String(obj[name]).trim()) return String(obj[name]).trim();
+    return "";
+  };
+  return rows.map(values => {
+    const item = {};
+    headers.forEach((h,i) => item[h] = values[i] || "");
+    return {
+      title: pick(item, ["title","job_title","role","position"]),
+      company: pick(item, ["company","employer","organization"]),
+      location: pick(item, ["location","city","job_location"]),
+      work_mode: pick(item, ["work_mode","workmode","remote_type"]),
+      url: pick(item, ["url","apply_link","apply_url","job_url","link"]),
+      source: pick(item, ["source","platform"]) || "Daily Fresher Job Radar",
+      description: pick(item, ["description","job_description","summary"]),
+      date_posted: pick(item, ["date_posted","posted_date","date","posting_date"]),
+      status: "saved"
+    };
+  }).filter(job => job.title && job.company);
+}
+async function careerAgentImportCsv() {
+  const input = document.getElementById("ca-job-csv");
+  const file = input.files && input.files[0];
+  if (!file) { caMessage("ca-job-message", "Choose a CSV file first.", "error"); return; }
+  try {
+    const jobs = careerAgentParseCsv(await file.text());
+    if (!jobs.length) throw new Error("No valid jobs found. Check the CSV column headers.");
+    const result = await careerAgentApi({ action: "jobs.import", jobs });
+    caMessage("ca-job-message", result.imported + " CSV rows processed and saved. Repeated URLs are deduplicated.", "ok");
+    input.value = "";
+    await careerAgentLoadJobs();
+  } catch (error) { caMessage("ca-job-message", error.message, "error"); }
+}
+function careerAgentExportCsv() {
+  const columns = ["title","company","location","work_mode","url","source","description","date_posted","status","fit_score"];
+  const quote = value => '"' + String(value == null ? "" : value).replace(/"/g,'""') + '"';
+  const rows = [columns.join(",")].concat(careerAgent.jobs.map(job => [
+    job.title,job.company,job.location,job.work_mode,job.url,job.source,job.description,job.date_posted,
+    job.status,(job.fit && job.fit.score) || ""
+  ].map(quote).join(",")));
+  const blob = new Blob([rows.join("\r\n")], { type:"text/csv;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "career_agent_jobs_" + today() + ".csv"; a.click();
+  URL.revokeObjectURL(a.href);
+}
+async function careerAgentGeneratePacket(jobId) {
+  try {
+    showToast("Preparing your job-specific application pack...");
+    const packet = await careerAgentApi({ action: "packet.generate", job_id: jobId });
+    careerAgent.lastPacket = packet.draft || "";
+    document.getElementById("ca-packet-meta").textContent =
+      (packet.job.company || "") + " · " + (packet.job.title || "") + " · Fit score " + packet.fit.score + "/100 · Saved to approval queue";
+    document.getElementById("ca-packet-text").textContent = careerAgent.lastPacket;
+    document.getElementById("career-agent-packet").style.display = "block";
+    await careerAgentLoadApprovals();
+    document.getElementById("career-agent-packet").scrollIntoView({ behavior:"smooth", block:"start" });
+    showToast("✓ Draft generated and added to approval queue");
+  } catch (error) { showToast(error.message); }
+}
+function careerAgentDownloadPacket() {
+  if (!careerAgent.lastPacket) return;
+  const blob = new Blob([careerAgent.lastPacket], { type:"text/plain;charset=utf-8" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "job_preparation_pack_" + today() + ".txt"; a.click();
+  URL.revokeObjectURL(a.href);
+}
+async function careerAgentCheckCredits() {
+  caMessage("ca-happenstance-credits", "Checking credits...");
+  try {
+    const data = await careerAgentApi({ action: "happenstance.usage" });
+    const balance = data.balance_credits == null ? "Balance unavailable" : String(data.balance_credits) + " credits";
+    caMessage("ca-happenstance-credits", balance + (data.has_credits === false ? " · No credits available" : ""), "ok");
+  } catch (error) { caMessage("ca-happenstance-credits", error.message, "error"); }
+}
+function careerAgentBuildPeopleQuery() {
+  const company = document.getElementById("ca-network-company").value.trim();
+  const role = document.getElementById("ca-network-role").value.trim() || "entry-level AI, Python and data roles";
+  const location = document.getElementById("ca-network-location").value.trim() || "Bengaluru and Hyderabad";
+  return "Find recruiters, hiring managers and engineers" +
+    (company ? " at " + company : " at companies relevant to this candidate") +
+    " who can help with " + role + " opportunities in " + location +
+    ". Prioritize direct connections and mutual introduction paths. Return current role, company, professional profile link and shared connection names when available. Do not assume anyone is hiring unless supported by the result.";
+}
+async function careerAgentSearchNetwork() {
+  if (!document.getElementById("ca-network-ack").checked) {
+    caMessage("ca-network-message", "Confirm the 2-credit search cost before continuing.", "error"); return;
+  }
+  const includeMine = document.getElementById("ca-network-my-connections").checked;
+  const includeFriends = document.getElementById("ca-network-friends").checked;
+  if (!includeMine && !includeFriends) {
+    caMessage("ca-network-message", "Choose at least one connection source.", "error"); return;
+  }
+  const query = document.getElementById("ca-network-query").value.trim() || careerAgentBuildPeopleQuery();
+  caSetBusy("ca-network-search-btn", true, "Starting search...", "Search my network · 2 credits");
+  caMessage("ca-network-message", "Starting a new Happenstance search. It may take 30–60 seconds.", "");
+  document.getElementById("ca-network-results").innerHTML = "";
+  try {
+    const data = await careerAgentApi({
+      action: "happenstance.search", text: query, acknowledged: true,
+      include_my_connections: includeMine, include_friends_connections: includeFriends
+    });
+    careerAgent.searchId = data.search && data.search.id ? data.search.id : "";
+    careerAgent.searchPageId = "";
+    if (!careerAgent.searchId) throw new Error("Happenstance did not return a search ID.");
+    await careerAgentPollSearch();
+  } catch (error) {
+    caMessage("ca-network-message", error.message, "error");
+  } finally {
+    caSetBusy("ca-network-search-btn", false, "", "Search my network · 2 credits");
+  }
+}
+async function careerAgentPollSearch(pageId = "") {
+  const statusLine = "Happenstance search " + careerAgent.searchId + " is running. Checking for results...";
+  caMessage("ca-network-message", statusLine, "");
+  for (let attempt = 0; attempt < 12; attempt++) {
+    if (attempt > 0) await new Promise(resolve => setTimeout(resolve, 6000));
+    const result = await careerAgentApi({
+      action: "happenstance.results", search_id: careerAgent.searchId, page_id: pageId
+    });
+    const search = result.search || {};
+    const status = String(search.status || "").toUpperCase();
+    if (status === "COMPLETED") {
+      careerAgent.searchPeople = result.people || [];
+      careerAgent.searchPageId = pageId;
+      caMessage("ca-network-message", careerAgent.searchPeople.length + " people found. Review profiles before creating any outreach draft.", "ok");
+      careerAgentRenderPeople(search.has_more === true);
+      return;
+    }
+    if (status.startsWith("FAILED")) {
+      caMessage("ca-network-message", "Happenstance search failed. Check your Happenstance account and try again.", "error");
+      return;
+    }
+    caMessage("ca-network-message", "Search running · check " + (attempt + 1) + "/12 · results will appear when ready.", "");
+  }
+  caMessage("ca-network-message", "Still processing. Use Refresh results below rather than starting another paid search.", "");
+  document.getElementById("ca-network-results").innerHTML =
+    '<button class="btn btn-ghost btn-sm" onclick="careerAgentPollSearch()">↻ Refresh results</button>';
+}
+function careerAgentRenderPeople(hasMore = false) {
+  const root = document.getElementById("ca-network-results");
+  const people = careerAgent.searchPeople || [];
+  if (!people.length) {
+    root.innerHTML = '<div class="agent-muted" style="margin-top:12px">Search completed, but no matching people were returned. Check your connected accounts and network sources in Happenstance.</div>';
+    return;
+  }
+  root.innerHTML = '<div class="agent-muted" style="margin-top:16px">' + people.length + ' people returned by Happenstance</div>' +
+    people.map((p,i) => '<article class="agent-person"><h4>' + escHtml(p.name) + '</h4>' +
+      '<div class="agent-job-meta">' + escHtml([p.title,p.company].filter(Boolean).join(" · ")) + '</div>' +
+      '<p>' + escHtml(p.summary || "No summary supplied.") + '</p>' +
+      (p.mutuals && p.mutuals.length ? '<p><strong>Shared connections:</strong> ' + escHtml(p.mutuals.join(", ")) + '</p>' : '') +
+      '<div class="agent-actions">' +
+      (caSafeUrl(p.linkedin_url) ? '<a class="btn btn-ghost btn-sm" href="' + caAttr(caSafeUrl(p.linkedin_url)) + '" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>' : '') +
+      (caSafeUrl(p.happenstance_url) ? '<a class="btn btn-ghost btn-sm" href="' + caAttr(caSafeUrl(p.happenstance_url)) + '" target="_blank" rel="noopener noreferrer">Happenstance ↗</a>' : '') +
+      '<button class="btn btn-primary btn-sm" onclick="careerAgentDraftIntro(' + i + ')">Draft introduction</button></div></article>'
+    ).join("") +
+    (hasMore ? '<div class="agent-actions"><button class="btn btn-ghost btn-sm" onclick="careerAgentFindMore()">Find more · 2 credits</button></div>' : '');
+}
+async function careerAgentFindMore() {
+  if (!window.confirm("Happenstance charges 2 additional credits for Find More. Continue?")) return;
+  try {
+    const result = await careerAgentApi({ action:"happenstance.findMore", search_id:careerAgent.searchId });
+    careerAgent.searchPageId = result.page && result.page.page_id ? result.page.page_id : "";
+    if (!careerAgent.searchPageId) throw new Error("Happenstance did not return an additional-results page.");
+    await careerAgentPollSearch(careerAgent.searchPageId);
+  } catch (error) { caMessage("ca-network-message", error.message, "error"); }
+}
+async function careerAgentDraftIntro(index) {
+  const person = careerAgent.searchPeople[index];
+  if (!person) return;
+  try {
+    const result = await careerAgentApi({ action:"happenstance.intro", person });
+    await careerAgentLoadApprovals();
+    caMessage("ca-network-message", "Introduction draft created for " + person.name + " and added to the approval queue. Nothing was sent.", "ok");
+    showToast("Draft saved for your review");
+  } catch (error) { caMessage("ca-network-message", error.message, "error"); }
+}
+async function careerAgentLoadApprovals() {
+  try {
+    const data = await careerAgentApi({ action:"approvals.list" });
+    careerAgent.approvals = data.approvals || [];
+    document.getElementById("ca-stat-pending").textContent = careerAgent.approvals.filter(a => a.status === "pending").length;
+    const root = document.getElementById("career-agent-approvals");
+    if (!careerAgent.approvals.length) {
+      root.innerHTML = '<div class="agent-muted" style="padding:14px 0">No drafts waiting for review.</div>'; return;
+    }
+    root.innerHTML = careerAgent.approvals.map(item => {
+      const payload = item.payload || {};
+      const draft = payload.draft || "";
+      const integrity = item.payload_integrity_ok === true;
+      const status = item.status || "pending";
+      const canReview = status === "pending" && integrity;
+      return '<article class="agent-approval"><div class="agent-approval-head"><div><strong>' + escHtml(item.title) + '</strong>' +
+        '<div class="agent-job-meta">' + escHtml([item.company,item.role,item.action_type].filter(Boolean).join(" · ")) + '</div></div>' +
+        '<span class="agent-status ' + caAttr(status) + '">' + escHtml(status.toUpperCase()) + '</span></div>' +
+        (draft ? '<details style="margin-top:10px"><summary class="agent-muted" style="cursor:pointer">Review draft content</summary><pre class="agent-output">' + escHtml(draft) + '</pre></details>' : '') +
+        (!integrity ? '<p class="agent-message error">Integrity check failed. This draft cannot be approved.</p>' : '') +
+        (item.reviewer_note ? '<p class="agent-muted" style="margin-top:8px">Review note: ' + escHtml(item.reviewer_note) + '</p>' : '') +
+        (canReview ? '<div class="agent-actions"><button class="btn btn-primary btn-sm" onclick="careerAgentDecideApproval(' + "'" + caAttr(item.approval_id) + "'" + ',"approved")">Record approval</button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="careerAgentDecideApproval(' + "'" + caAttr(item.approval_id) + "'" + ',"rejected")">Reject draft</button></div>' : '') +
+        '</article>';
+    }).join("");
+    careerAgentRenderJobs();
+  } catch (error) {
+    document.getElementById("career-agent-approvals").textContent = error.message;
+  }
+}
+async function careerAgentDecideApproval(id, decision) {
+  const note = document.getElementById("ca-approval-note")?.value || "";
+  const explanation = decision === "approved"
+    ? "This records your approval only. No application or message will be sent."
+    : "This records your rejection. No external action is performed.";
+  if (!window.confirm(explanation + " Continue?")) return;
+  try {
+    await careerAgentApi({ action:"approvals.decide", approval_id:id, decision, reviewer_note:note });
+    await careerAgentLoadApprovals();
+    await careerAgentLoadAudit();
+    showToast("✓ Decision recorded — no external action was executed");
+  } catch (error) { showToast(error.message); }
+}
+async function careerAgentLoadAudit() {
+  try {
+    const data = await careerAgentApi({ action:"audit.list" });
+    careerAgent.audit = data.events || [];
+    const root = document.getElementById("career-agent-audit");
+    if (!careerAgent.audit.length) {
+      root.innerHTML = '<div class="agent-muted">No activity recorded yet.</div>'; return;
+    }
+    root.innerHTML = '<div class="agent-table-wrap"><table class="agent-audit"><thead><tr><th>Time</th><th>Event</th><th>Type</th><th>Record</th></tr></thead><tbody>' +
+      careerAgent.audit.map(e => '<tr><td>' + escHtml(new Date(e.created_at).toLocaleString()) + '</td><td>' + escHtml(e.event_type) + '</td><td>' + escHtml(e.entity_type) + '</td><td>' + escHtml(e.entity_id) + '</td></tr>').join("") +
+      '</tbody></table></div>';
+  } catch (error) {
+    document.getElementById("career-agent-audit").textContent = error.message;
+  }
+}
+
+// ── END CAREER AGENT ──
+
 // ── INIT ──
 function init() {
   if (!state.apiKey) {
@@ -662,6 +1313,7 @@ function goTo(page, btn) {
   document.getElementById('page-' + page).classList.add('active');
   if (btn) btn.classList.add('active');
   closeSidebar();
+  if (page === "agent") careerAgentEnter();
 }
 function openSidebar() {
   document.getElementById('sidebar').classList.add('open');
@@ -680,7 +1332,7 @@ async function callGroq(messages, systemPrompt) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages: [{ role: 'system', content: systemPrompt }, ...messages],
       temperature: 0.7,
       max_tokens: 1500
